@@ -1,4 +1,4 @@
-const fs = require('fs');
+/* const fs = require('fs');
 const pdf = require('pdf-parse');
 const BigNumber = require('bignumber.js');
 const axios = require('axios');
@@ -78,3 +78,23 @@ getMnbKozepArfolyamByDate('20201030').then((mnbKozepArfolyam) => {
 });
 
 getActivities().then(activities => console.log(activities));
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
