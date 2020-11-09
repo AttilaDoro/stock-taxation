@@ -13,8 +13,6 @@
     "bignumber.js": "^9.0.1",
     "googleapis": "^39.2.0",
     "pdf-parse": "^1.1.1",
-    "pdf2json": "^1.2.0",
-    "pdfreader": "^1.2.7",
     "xml2js": "^0.4.23"
   }
 }
