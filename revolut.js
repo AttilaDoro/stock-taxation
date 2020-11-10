@@ -1,8 +1,14 @@
 const fs = require('fs');
 const pdf = require('pdf-parse');
 const BigNumber = require('bignumber.js');
+const { promisify } = require('util');
  
-const dataBuffer = fs.readFileSync('./revolut/2020-09.pdf');
+const getAllFiles = () => {
+  const filenames = fs.readdirSync('./revolut'); 
+  const readFile = promisify(fs.readFile);
+  const filesPromises = filenames.map(file => readFile(`./revolut/${file}`));
+  return Promise.all(filesPromises);
+};
 
 const getSymbol = (row, activityType) => {
   const indexStart = 23 + activityType.length;
@@ -32,7 +38,7 @@ const getAmount = (activityType, quantityString, priceString) => {
   return amountBigN.multipliedBy('-1').toNumber();
 };
 
-const getActivitiesFromRevolut = async () => {
+const getActivities = async (dataBuffer) => {
   try {
     const data = await pdf(dataBuffer);
     const activityTable = data.text.split('ACTIVITY');
@@ -52,7 +58,17 @@ const getActivitiesFromRevolut = async () => {
       });
     return activities;
   } catch (error) {
-    console.error('PDF error', error);
+    console.error('getActivities error', error);
+  }
+};
+
+const getActivitiesFromRevolut = async () => {
+  try {
+    const dataBuffers = await getAllFiles();
+    const allActivities = await Promise.all(dataBuffers.map(getActivities));
+    return allActivities.flat();
+  } catch (error) {
+    console.error('getActivitiesFromRevolut error', error);
   }
 };
 
