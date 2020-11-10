@@ -138,7 +138,13 @@ const getActivities = async (auth) => {
     const messages = await getMessages(gmail, { auth: auth, userId: 'me', q: 'Contract Note Statement from Trading 212' });
     const activityPromises = messages.map(({ id: message_id }) => getActivitiesFromEmail(gmail, { auth: auth, userId: 'me', 'id': message_id }));
     const activities = await Promise.all(activityPromises);
-    return activities.flat();
+    return activities
+      .flat()
+      .map((activity, index) => {
+        const { instrument } = activity;
+        const [symbol] = instrument.split('/');
+        return { ...activity, symbol, id: index + 1 }
+      });
   } catch (error) {
     console.log(error);
   }

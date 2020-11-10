@@ -66,7 +66,9 @@ const getActivitiesFromRevolut = async () => {
   try {
     const dataBuffers = await getAllFiles();
     const allActivities = await Promise.all(dataBuffers.map(getActivities));
-    return allActivities.flat();
+    return allActivities
+      .flat()
+      .map((activity, index) => ({ ...activity, id: index + 1 }));
   } catch (error) {
     console.error('getActivitiesFromRevolut error', error);
   }
