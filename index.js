@@ -27,8 +27,9 @@ const getBuyActivitiesThatWereSoldLater = (activities, isRevolut) => {
 // getMnbKozepArfolyamByDate('20201030').then((mnbKozepArfolyam) => console.log(mnbKozepArfolyam));
 Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
   .then(([activitiesFromRevolut, activitiesFromTrading212]) => {
-    // const majom = getBuyActivitiesThatWereSoldLater(activitiesFromRevolut, true);
+    const majom = getBuyActivitiesThatWereSoldLater(activitiesFromRevolut, true);
     const kutya = getBuyActivitiesThatWereSoldLater(activitiesFromTrading212, false);
+    console.log(JSON.stringify(majom, null, 2));
     console.log(JSON.stringify(kutya, null, 2));
   })
   .catch((error) => console.error(error));

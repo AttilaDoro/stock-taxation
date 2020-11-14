@@ -40,9 +40,8 @@ const getAmount = (activityType, quantityString, priceString) => {
 
 const getActivities = async (dataBuffer) => {
   try {
-    const data = await pdf(dataBuffer);
-    const activityTable = data.text.split('ACTIVITY');
-    const activityRows = activityTable[1].split('\n');
+    const { text = '' } = await pdf(dataBuffer) || {};
+    const activityRows = text.split('\n');
     const activities = activityRows
       .filter(row => row.includes('BUY') || row.includes('SELL'))
       .map((row) => {
