@@ -4,16 +4,23 @@ const { promisify } = require('util');
 
 const getMnbKozepArfolyamByDate = async (date) => {
   try {
-    const response = await axios.get(`http://api.napiarfolyam.hu/?valuta=usd&valutanem=deviza&datum=${date}`);
+    const { data } = await axios.get(`http://api.napiarfolyam.hu/?valuta=usd&valutanem=deviza&datum=${date}`);
     const parse = promisify(parseString);
-    const { arfolyamok = {} } = await parse(response.data);
+    const { arfolyamok = {} } = await parse(data);
     const { deviza = [] } = arfolyamok;
     const { item = [] } = deviza[0] || {};
     const { kozep = [] } = item.find(({ bank }) => bank[0] === 'mnb');
-    return kozep[0];
+    const arfolyamObj = {};
+    arfolyamObj[date] = kozep[0];
+    return arfolyamObj;
   } catch (error) {
     console.error('api call error', error);
   }
 };
 
-module.exports = { getMnbKozepArfolyamByDate };
+const getMnbKozepArfolyamByDates = (dates) => {
+  const datePromises = dates.map(getMnbKozepArfolyamByDate);
+  return Promise.all(datePromises);
+};
+
+module.exports = { getMnbKozepArfolyamByDates };
