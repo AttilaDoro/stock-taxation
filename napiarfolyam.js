@@ -18,9 +18,14 @@ const getMnbKozepArfolyamByDate = async (date) => {
   }
 };
 
-const getMnbKozepArfolyamByDates = (dates) => {
+const getMnbKozepArfolyamByDates = async (dates) => {
   const datePromises = dates.map(getMnbKozepArfolyamByDate);
-  return Promise.all(datePromises);
+  try {
+    const exchangeRates = await Promise.all(datePromises);
+    return exchangeRates.reduce((accumulator, currentExchangeRate) => ({ ...accumulator, ...currentExchangeRate }), {});
+  } catch (error) {
+    console.error('getMnbKozepArfolyamByDates error', error);
+  }
 };
 
 module.exports = { getMnbKozepArfolyamByDates };
