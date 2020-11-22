@@ -49,49 +49,63 @@ const getAllActivityDates = (soldRevolutActivities, soldTrading212Activities) =>
   return [...new Set([...revolutDates, ...trading212Dates])].sort();
 };
 
-/* const getActivityPriceInHUF = (activityPrice, activityDate, quantity, exchangeRates) => {
+const getActivityPriceInHUF = (activityPrice, activityDate, quantity, exchangeRates) => {
   const currentPrice = new BigNumber(activityPrice);
   const tradeDate = moment(activityDate, 'MM/DD/YYYY').format('YYYYMMDD');
   return currentPrice.multipliedBy(exchangeRates[tradeDate]).multipliedBy(quantity);
-}; */
+};
+
+const getSumPrice = (price, tradeDate, quantity, priceSoFarInHUF, exchangeRates) => {
+  const currentPriceInHUF = getActivityPriceInHUF(price, tradeDate, quantity, exchangeRates);
+  return currentPriceInHUF.plus(priceSoFarInHUF).toNumber();
+};
+
+const getSumQuantity = (quantity, quantitySoFar) => {
+  const currentQuantity = new BigNumber(quantity);
+  return currentQuantity.plus(quantitySoFar).toNumber();
+};
+
+const getPriceInHUFAndQuantity = (currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, quantitySoFar, exchangeRates) => {
+  const priceInHUF = getSumPrice(currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, exchangeRates);
+  const quantity = getSumQuantity(currentQuantity, quantitySoFar);
+  return { quantity, priceInHUF };
+};
+
+const getLastIndexToKeep = (buy, soldQuantity) => {
+  const { lastIndexToKeep } = buy.reduce((accumulator, { quantity }, index) => {
+    const nextItem = buy[index + 1];
+    if (!nextItem) return accumulator;
+    const quantitySoFar = new BigNumber(accumulator.quantity);
+    const quantitySum = quantitySoFar.plus(quantity).plus(nextItem.quantity);
+    return { quantity: quantitySoFar.plus(quantity).toNumber(), lastIndexToKeep: quantitySum.isLessThanOrEqualTo(soldQuantity) ? index + 1 : accumulator.lastIndexToKeep };
+  }, { quantity: 0, lastIndexToKeep: 0 });
+  return lastIndexToKeep;
+};
+
+const getBoughtPriceInHUF = (buy, lastIndexToKeep, soldQuantity, exchangeRates) => {
+  const importantBuys = buy.slice(0, lastIndexToKeep + 1);
+  const { priceInHUF: boughtPriceInHUF } = importantBuys.reduce((accumulator, currentActivity, index) => {
+    if (index < lastIndexToKeep || importantBuys.length === buy.length) {
+      return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
+    }
+    const sold = new BigNumber(soldQuantity);
+    const remainder = sold.minus(accumulator.quantity).toNumber();
+    return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, remainder, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
+  }, { quantity: 0, priceInHUF: 0 });
+  return boughtPriceInHUF;
+};
+
+const getSoldQuantityAndSoldPriceInHUF = (sell, exchangeRates) => sell.reduce(
+  (accumulator, { price, tradeDate, quantity }) => getPriceInHUFAndQuantity(price, tradeDate, quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates),
+  { quantity: 0, priceInHUF: 0 });
 
 const getDunno = (soldActivities, exchangeRates) =>  {
   const symbols = Object.keys(soldActivities);
   return symbols.map((symbol) => {
     const { buy, sell } = soldActivities[symbol];
-    const { quantity: soldQuantity, priceInHUF: soldPriceInHUF } = sell.reduce((accumulator, currentActivity) => {
-      const currentQuantity = new BigNumber(currentActivity.quantity);
-      const currentPrice = new BigNumber(currentActivity.price);
-      const tradeDate = moment(currentActivity.tradeDate, 'MM/DD/YYYY').format('YYYYMMDD');
-      const currentPriceInHUF = currentPrice.multipliedBy(exchangeRates[tradeDate]).multipliedBy(currentActivity.quantity);
-      const priceInHUF = currentPriceInHUF.plus(accumulator.priceInHUF).toNumber();
-      const quantity = currentQuantity.plus(accumulator.quantity).toNumber();
-      return { quantity, priceInHUF };
-    }, { quantity: 0, priceInHUF: 0 });
-    const { lastIndexToKeep } = buy.reduce((accumulator, { quantity }, index) => {
-      const nextItem = buy[index + 1];
-      if (!nextItem) return accumulator;
-      const quantitySoFar = new BigNumber(accumulator.quantity);
-      const quantitySum = quantitySoFar.plus(quantity).plus(nextItem.quantity);
-      return { quantity: quantitySoFar.plus(quantity).toNumber(), lastIndexToKeep: quantitySum.isLessThanOrEqualTo(soldQuantity) ? index + 1 : accumulator.lastIndexToKeep };
-    }, { quantity: 0, lastIndexToKeep: 0 });
-    const importantBuys = buy.slice(0, lastIndexToKeep + 1);
-    const { priceInHUF: boughtPriceInHUF } = importantBuys.reduce((accumulator, currentActivity, index) => {
-      const currentPrice = new BigNumber(currentActivity.price);
-      const tradeDate = moment(currentActivity.tradeDate, 'MM/DD/YYYY').format('YYYYMMDD');
-      if (index < lastIndexToKeep || importantBuys.length === buy.length) {
-        const currentQuantity = new BigNumber(currentActivity.quantity);
-        const currentPriceInHUF = currentPrice.multipliedBy(exchangeRates[tradeDate]).multipliedBy(currentActivity.quantity);
-        const priceInHUF = currentPriceInHUF.plus(accumulator.priceInHUF).toNumber();
-        const quantity = currentQuantity.plus(accumulator.quantity).toNumber();
-        return { quantity, priceInHUF };
-      }
-      const sold = new BigNumber(soldQuantity);
-      const remainder = sold.minus(accumulator.quantity);
-      const currentPriceInHUF = currentPrice.multipliedBy(exchangeRates[tradeDate]).multipliedBy(remainder);
-      const priceInHUF = currentPriceInHUF.plus(accumulator.priceInHUF).toNumber();
-      return { quantity: remainder.plus(accumulator.quantity), priceInHUF };
-    }, { quantity: 0, priceInHUF: 0 });
+    const { quantity: soldQuantity, priceInHUF: soldPriceInHUF } = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
+    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
     const returnObj = {};
     returnObj[symbol] = { soldPriceInHUF, boughtPriceInHUF };
     return returnObj;
