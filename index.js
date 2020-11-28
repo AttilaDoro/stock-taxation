@@ -49,14 +49,15 @@ const getAllActivityDates = (soldRevolutActivities, soldTrading212Activities) =>
   return [...new Set([...revolutDates, ...trading212Dates])].sort();
 };
 
-const getActivityPriceInHUF = (activityPrice, activityDate, quantity, exchangeRates) => {
-  const currentPrice = new BigNumber(activityPrice);
-  const tradeDate = moment(activityDate, 'MM/DD/YYYY').format('YYYYMMDD');
+const getActivityPriceInHUF = (activityPrice, activityDate, quantity, exchangeRates, isRevolut) => {
+  const price = isRevolut ? activityPrice : activityPrice.split(' USD')[0];
+  const currentPrice = new BigNumber(price);
+  const tradeDate = moment(activityDate, isRevolut ? 'MM/DD/YYYY' : 'DD-MM-YYYY').format('YYYYMMDD');
   return currentPrice.multipliedBy(exchangeRates[tradeDate]).multipliedBy(quantity);
 };
 
-const getSumPrice = (price, tradeDate, quantity, priceSoFarInHUF, exchangeRates) => {
-  const currentPriceInHUF = getActivityPriceInHUF(price, tradeDate, quantity, exchangeRates);
+const getSumPrice = (price, tradeDate, quantity, priceSoFarInHUF, exchangeRates, isRevolut) => {
+  const currentPriceInHUF = getActivityPriceInHUF(price, tradeDate, quantity, exchangeRates, isRevolut);
   return currentPriceInHUF.plus(priceSoFarInHUF).toNumber();
 };
 
@@ -65,8 +66,8 @@ const getSumQuantity = (quantity, quantitySoFar) => {
   return currentQuantity.plus(quantitySoFar).toNumber();
 };
 
-const getPriceInHUFAndQuantity = (currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, quantitySoFar, exchangeRates) => {
-  const priceInHUF = getSumPrice(currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, exchangeRates);
+const getPriceInHUFAndQuantity = (currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, quantitySoFar, exchangeRates, isRevolut) => {
+  const priceInHUF = getSumPrice(currentPrice, currentTradeDate, currentQuantity, priceInHUFSoFar, exchangeRates, isRevolut);
   const quantity = getSumQuantity(currentQuantity, quantitySoFar);
   return { quantity, priceInHUF };
 };
@@ -82,34 +83,66 @@ const getLastIndexToKeep = (buy, soldQuantity) => {
   return lastIndexToKeep;
 };
 
-const getBoughtPriceInHUF = (buy, lastIndexToKeep, soldQuantity, exchangeRates) => {
+const getBoughtPriceInHUF = (buy, lastIndexToKeep, soldQuantity, exchangeRates, isRevolut) => {
   const importantBuys = buy.slice(0, lastIndexToKeep + 1);
   const { priceInHUF: boughtPriceInHUF } = importantBuys.reduce((accumulator, currentActivity, index) => {
     if (index < lastIndexToKeep || importantBuys.length === buy.length) {
-      return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
+      return isRevolut
+        ? getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut)
+        : getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradingDay, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut);
     }
     const sold = new BigNumber(soldQuantity);
     const remainder = sold.minus(accumulator.quantity).toNumber();
-    return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, remainder, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
+    return isRevolut
+      ? getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, remainder, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut)
+      : getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradingDay, remainder, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut);
   }, { quantity: 0, priceInHUF: 0 });
   return boughtPriceInHUF;
 };
 
-const getSoldQuantityAndSoldPriceInHUF = (sell, exchangeRates) => sell.reduce(
-  (accumulator, { price, tradeDate, quantity }) => getPriceInHUFAndQuantity(price, tradeDate, quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates),
-  { quantity: 0, priceInHUF: 0 });
+const getSoldQuantityAndSoldPriceInHUF = (sell, exchangeRates, isRevolut) => {
+  if (isRevolut) {
+    return sell.reduce(
+      (accumulator, { price, tradeDate, quantity }) => getPriceInHUFAndQuantity(price, tradeDate, quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut),
+      { quantity: 0, priceInHUF: 0 });
+  }
+  return sell.reduce(
+    (accumulator, { price, tradingDay, quantity }) => getPriceInHUFAndQuantity(price, tradingDay, quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates, isRevolut),
+    { quantity: 0, priceInHUF: 0 });
+};
 
-const getDunno = (soldActivities, exchangeRates) =>  {
+const getActivityPerformanceData = (soldActivities, exchangeRates, isRevolut) => {
   const symbols = Object.keys(soldActivities);
   return symbols.map((symbol) => {
     const { buy, sell } = soldActivities[symbol];
-    const { quantity: soldQuantity, priceInHUF: soldPriceInHUF } = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const { quantity: soldQuantity, priceInHUF: soldPriceInHUF } = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates, isRevolut);
     const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
+    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates, isRevolut);
     const returnObj = {};
-    returnObj[symbol] = { soldPriceInHUF, boughtPriceInHUF };
+    const soldPrice = new BigNumber(soldPriceInHUF);
+    returnObj[symbol] = { soldPriceInHUF, boughtPriceInHUF, difference: soldPrice.minus(boughtPriceInHUF).toNumber() };
     return returnObj;
   });
+};
+
+const getAllPerformanceData = (revolutPerformanceData, trading212PerformanceData) => [...revolutPerformanceData, ...trading212PerformanceData]
+  .reduce((accumulator, current) => {
+      const [symbol] = Object.keys(current);
+      const newObj = { ...accumulator };
+      newObj[symbol] = current[symbol];
+      return newObj;
+    }, {});
+
+const getTaxAmount = (performanceData) => {
+  const symbols = Object.keys(performanceData);
+  const finalPerformance = symbols.reduce((accumulator, currentSymbol) => {
+    const { difference } = performanceData[currentSymbol];
+    const acc = new BigNumber(accumulator);
+    return acc.plus(difference).toNumber();
+  }, 0);
+  if (finalPerformance <= 0) return 0;
+  const performance = new BigNumber(finalPerformance);
+  return performance.multipliedBy(0.15).toNumber();
 };
 
 Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
@@ -118,11 +151,14 @@ Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
     const soldTrading212Activities = getBuyActivitiesThatWereSoldLater(activitiesFromTrading212, false);
     const activityDates = getAllActivityDates(soldRevolutActivities, soldTrading212Activities);
     getMnbKozepArfolyamByDates(activityDates).then((exchangeRates) => {
-      console.log(exchangeRates);
-      const dunno = getDunno(soldRevolutActivities, exchangeRates);
-      console.log(dunno);
+      const revolutPerformanceData = getActivityPerformanceData(soldRevolutActivities, exchangeRates, true);
+      const trading212PerformanceData = getActivityPerformanceData(soldTrading212Activities, exchangeRates);
+      const performanceData = getAllPerformanceData(revolutPerformanceData, trading212PerformanceData);
+      const taxAmount = getTaxAmount(performanceData);
+      console.log(performanceData);
+      console.log('*******************');
+      console.log('TAX AMOUNT: ', taxAmount);
+      console.log('*******************');
     });
-    console.log(JSON.stringify(soldRevolutActivities, null, 2));
-    console.log(JSON.stringify(soldTrading212Activities, null, 2));
   })
   .catch((error) => console.error(error));
