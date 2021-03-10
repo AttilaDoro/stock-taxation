@@ -1,4 +1,5 @@
 const axios = require('axios');
+const moment = require('moment');
 const { parseString } = require('xml2js');
 const { promisify } = require('util');
 
@@ -9,7 +10,15 @@ const getMnbKozepArfolyamByDate = async (date) => {
     const { arfolyamok = {} } = await parse(data);
     const { deviza = [] } = arfolyamok;
     const { item = [] } = deviza[0] || {};
-    const { kozep = [] } = item.find(({ bank }) => bank[0] === 'mnb');
+    const mnb = item.find(({ bank }) => bank[0] === 'mnb');
+    if (!mnb) {
+      const newDate = moment(date).subtract(1, 'day').format('YYYYMMDD');
+      const result = await getMnbKozepArfolyamByDate(newDate);
+      const newArfolyamObj = {};
+      newArfolyamObj[date] = result[newDate];
+      return newArfolyamObj;
+    }
+    const { kozep = [] } = mnb;
     const arfolyamObj = {};
     arfolyamObj[date] = kozep[0];
     return arfolyamObj;
