@@ -1,7 +1,9 @@
 const fs = require('fs');
 const pdf = require('pdf-parse');
+const moment = require('moment');
 const BigNumber = require('bignumber.js');
 const { promisify } = require('util');
+const { getAmount } = require('./common');
  
 const getAllFiles = () => {
   const filenames = fs.readdirSync('./revolut'); 
@@ -29,15 +31,6 @@ const getPrice = (row) => {
   return chunks[0];
 };
 
-const getAmount = (activityType, quantityString, priceString) => {
-  const quantity = new BigNumber(quantityString);
-  const price = new BigNumber(priceString);
-  const amount = quantity.multipliedBy(price).toNumber();
-  if (activityType === 'BUY') return amount;
-  const amountBigN = new BigNumber(amount);
-  return amountBigN.multipliedBy('-1').toNumber();
-};
-
 const getActivities = async (dataBuffer) => {
   try {
     const { text = '' } = await pdf(dataBuffer) || {};
@@ -45,15 +38,14 @@ const getActivities = async (dataBuffer) => {
     const activities = activityRows
       .filter(row => row.includes('BUY') || row.includes('SELL'))
       .map((row) => {
-        const tradeDate = row.substring(0,10);
-        const settleDate = row.substring(10,20);
+        const tradeDate = moment(row.substring(0,10), 'MM/DD/YYYY').format('YYYY-MM-DD');
         const currency = row.substring(20,23);
         const activityType = row.includes('BUY') ? 'BUY' : 'SELL';
         const symbol = getSymbol(row, activityType);
         const quantity = getQuantity(row);
         const price = getPrice(row);
         const amount = getAmount(activityType, quantity, price);
-        return { tradeDate, settleDate, currency, activityType, symbol, quantity, price, amount };
+        return { tradeDate, currency, activityType, symbol, quantity, price, amount, isRevolut: true };
       });
     return activities;
   } catch (error) {
@@ -65,9 +57,7 @@ const getActivitiesFromRevolut = async () => {
   try {
     const dataBuffers = await getAllFiles();
     const allActivities = await Promise.all(dataBuffers.map(getActivities));
-    return allActivities
-      .flat()
-      .map((activity, index) => ({ ...activity, id: index + 1 }));
+    return allActivities.flat();
   } catch (error) {
     console.error('getActivitiesFromRevolut error', error);
   }

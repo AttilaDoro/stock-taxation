@@ -1,7 +1,9 @@
 const fs = require('fs');
 const readline = require('readline');
+const moment = require('moment');
 const { google } = require('googleapis');
 const { promisify } = require('util');
+const { getAmount } = require('./common');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
@@ -140,10 +142,23 @@ const getActivities = async (auth) => {
     const activities = await Promise.all(activityPromises);
     return activities
       .flat()
-      .map((activity, index) => {
+      .map((activity) => {
         const { instrument } = activity;
         const [symbol] = instrument.split('/');
-        return { ...activity, symbol, id: index + 1 }
+        const { tradingDay, direction, quantity, price: priceText } = activity;
+        const [price] = priceText.split(' ');
+        const activityType = direction === 'Buy' ? 'BUY' : 'SELL';
+
+        return {
+          tradeDate: moment(tradingDay, 'DD-MM-YYYY').format('YYYY-MM-DD'),
+          currency: 'USD',
+          activityType,
+          symbol,
+          quantity,
+          price,
+          amount: getAmount(activityType, quantity, price),
+          isRevolut: false,
+        };
       });
   } catch (error) {
     console.log(error);
