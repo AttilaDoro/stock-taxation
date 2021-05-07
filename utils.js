@@ -138,6 +138,7 @@ const getTaxAmount = (performanceData) => {
 
 
 module.exports = {
+  getAmount,
   getBuyActivitiesThatWereSoldLater,
   getAllActivityDates,
   getAllPerformanceData,
