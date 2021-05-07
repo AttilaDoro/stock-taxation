@@ -3,7 +3,7 @@ const pdf = require('pdf-parse');
 const moment = require('moment');
 const BigNumber = require('bignumber.js');
 const { promisify } = require('util');
-const { getAmount } = require('./common');
+const { getAmount } = require('./utils');
  
 const getAllFiles = () => {
   const filenames = fs.readdirSync('./revolut'); 

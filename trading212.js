@@ -3,7 +3,7 @@ const readline = require('readline');
 const moment = require('moment');
 const { google } = require('googleapis');
 const { promisify } = require('util');
-const { getAmount } = require('./common');
+const { getAmount } = require('./utils');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
