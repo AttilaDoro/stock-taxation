@@ -1,8 +1,5 @@
 const moment = require('moment');
 const BigNumber = require('bignumber.js');
-const { getActivitiesFromTrading212 } = require('./trading212');
-const { getActivitiesFromRevolut } = require('./revolut');
-const { getMnbKozepArfolyamByDates } = require('./napiarfolyam');
 
 const getAmount = (activityType, quantityString, priceString) => {
   const quantity = new BigNumber(quantityString);
@@ -144,4 +141,8 @@ module.exports = {
   getAllPerformanceData,
   getActivityPerformanceData,
   getTaxAmount,
+  getActivityPriceInHUF,
+  getPriceInHUFAndQuantity,
+  getBoughtPriceInHUF,
+  getLastIndexToKeep,
 };
