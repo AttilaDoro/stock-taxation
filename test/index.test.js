@@ -16,7 +16,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
 
   it('Test #1', () => {
     const activities = [];
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
     const expected = {};
     assert.deepEqual(expected, buyActivitiesThatWereSoldLater);
   });
@@ -30,7 +30,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         tradeDate: '2020-10-01',
       },
     ];
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
     const expected = {};
     assert.deepEqual(expected, buyActivitiesThatWereSoldLater);
   });
@@ -50,7 +50,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         tradeDate: '2020-10-01',
       },
     ];
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
     const expected = {};
     assert.deepEqual(expected, buyActivitiesThatWereSoldLater);
   });
@@ -70,7 +70,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         tradeDate: '2020-10-01',
       },
     ];
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
     const expected = {
       TSLA: {
         buy: [],
@@ -102,7 +102,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         tradeDate: '2020-10-01',
       },
     ];
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
     const expected = {
       TSLA: {
         buy: [],
@@ -176,7 +176,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
       },
     ];
 
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
 
     const expected = {
       TSLA: {
@@ -284,7 +284,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
       },
     ];
 
-    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities, 2020);
 
     const expected = {
       TSLA: {

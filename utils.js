@@ -10,7 +10,8 @@ const getAmount = (activityType, quantityString, priceString) => {
   return amountBigN.multipliedBy('-1').toNumber();
 };
 
-const getActivitiesByActivityType = (activities, type) => activities.filter(({ activityType }) => activityType === type);
+const getActivitiesByActivityTypeAndSelectedYear = (activities, selectedYear, type) => activities
+  .filter(({ activityType, tradeDate }) => activityType === type && moment(tradeDate).isBefore(`${selectedYear + 1}-01-01`));
 const getActivitiesBySymbol = (activities, givenSymbol) => activities.filter(({ symbol }) => symbol === givenSymbol);
 
 const sortByDate = ({ tradeDate: tradeDateA }, { tradeDate: tradeDateB }) => {
@@ -19,9 +20,9 @@ const sortByDate = ({ tradeDate: tradeDateA }, { tradeDate: tradeDateB }) => {
   return 0;
 };
 
-const getBuyActivitiesThatWereSoldLater = (activities) => {
-  const soldActivities = getActivitiesByActivityType(activities, 'SELL');
-  const boughtActivities = getActivitiesByActivityType(activities, 'BUY');
+const getBuyActivitiesThatWereSoldLater = (activities, selectedYear) => {
+  const soldActivities = getActivitiesByActivityTypeAndSelectedYear(activities, selectedYear, 'SELL');
+  const boughtActivities = getActivitiesByActivityTypeAndSelectedYear(activities, selectedYear, 'BUY');
   const buyActivitiesThatWereSoldLater = soldActivities.reduce((finalActivitiesObject, currentSoldActivity) => {
     const { id, symbol } = currentSoldActivity;
     const boughtActivitiesFilteredBySymbol = getActivitiesBySymbol(boughtActivities, symbol);
