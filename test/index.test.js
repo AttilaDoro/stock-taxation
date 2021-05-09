@@ -7,6 +7,8 @@ const {
   getBoughtPriceInHUF,
   getAmount,
   getLastIndexToKeep,
+  getSoldQuantityAndSoldPriceInHUF,
+  getActivityPerformanceData,
 } = require('../utils');
 
 describe('getBuyActivitiesThatWereSoldLater', () => {
@@ -903,6 +905,993 @@ describe('getBoughtPriceInHUF', () => {
     const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
     const expected = 116500;
     assert.deepEqual(expected, boughtPriceInHUF);
+  });
+
+});
+
+describe('getSoldQuantityAndSoldPriceInHUF', () => {
+
+  it('Test #1', () => {
+    const sell = [
+      {
+        id: 4,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-04',
+        currency: 'USD',
+        quantity: '1',
+        price: '216.95',
+        amount: -216.95,
+      },
+      {
+        id: 6,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-04',
+        currency: 'USD',
+        quantity: '1',
+        price: '202',
+        amount: -202,
+      },
+    ];
+    const exchangeRates = {
+      '20201218': '300',
+      '20200904': '310',
+      '20201220': '320',
+    };
+    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const expected = { quantity: 2, priceInHUF: 129874.5 };
+    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
+  });
+
+  it('Test #2', () => {
+    const sell = [
+      {
+        id: 4,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-04',
+        currency: 'USD',
+        quantity: '1',
+        price: '216.95',
+        amount: -216.95,
+      },
+    ];
+    const exchangeRates = {
+      '20201218': '300',
+      '20200904': '310',
+      '20201220': '320',
+    };
+    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const expected = { quantity: 1, priceInHUF: 67254.5 };
+    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
+  });
+
+  it('Test #3', () => {
+    const sell = [
+      {
+        id: 4,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-04',
+        currency: 'USD',
+        quantity: '10',
+        price: '25',
+        amount: -250,
+      },
+    ];
+    const exchangeRates = {
+      '20201218': '300',
+      '20200904': '300',
+      '20201220': '320',
+    };
+    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const expected = { quantity: 10, priceInHUF: 75000 };
+    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
+  });
+
+  it('Test #4', () => {
+    const sell = [
+      {
+        id: 4,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-04',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: -5,
+      },
+      {
+        id: 5,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-14',
+        currency: 'USD',
+        quantity: '2',
+        price: '10',
+        amount: -20,
+      },
+      {
+        id: 6,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-24',
+        currency: 'USD',
+        quantity: '3',
+        price: '20',
+        amount: -60,
+      },
+    ];
+    const exchangeRates = {
+      '20201218': '300',
+      '20200904': '300',
+      '20200914': '310',
+      '20200924': '320',
+      '20201220': '320',
+    };
+    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
+    const expected = { quantity: 6, priceInHUF: 26900 };
+    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
+  });
+
+});
+
+describe('getActivityPerformanceData', () => {
+
+  it('Test #1', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6',
+            amount: -6,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 1500,
+          difference: 270,
+          soldPriceInHUF: 1770,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #2', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '3',
+            price: '6',
+            amount: -18,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3940,
+          difference: 1370,
+          soldPriceInHUF: 5310,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #3', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 2720,
+          difference: 820,
+          soldPriceInHUF: 3540,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #4', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6.5',
+            amount: -6.5,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #5', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1.98',
+            price: '5',
+            amount: 9.9,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2.61',
+            price: '4',
+            amount: 10.44,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1.22',
+            price: '6',
+            amount: -7.32,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '0.74',
+            price: '6.5',
+            amount: -4.81,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 2940,
+          difference: 638.35,
+          soldPriceInHUF: 3578.35,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #6', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1.98',
+            price: '5',
+            amount: 9.9,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2.61',
+            price: '4',
+            amount: 10.44,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1.22',
+            price: '6',
+            amount: -7.32,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1.74',
+            price: '6.5',
+            amount: -11.31,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 4165.6,
+          difference: 1330.25,
+          soldPriceInHUF: 5495.85,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #7', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '0.5',
+            price: '2',
+            amount: -1,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '3',
+            amount: -3,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 2110,
+          difference: -930,
+          soldPriceInHUF: 1180,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #8', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1.22',
+            price: '5.73',
+            amount: 6.9906,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2.59',
+            price: '4.43',
+            amount: 11.4737,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '0.56',
+            price: '2.22',
+            amount: -1.2432,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1.81',
+            price: '3.33',
+            amount: -6.0273,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3651.0025,
+          difference: -1506.205,
+          soldPriceInHUF: 2144.7975,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #9', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6.5',
+            amount: -6.5,
+          },
+        ],
+      },
+      SQ: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6.5',
+            amount: -6.5,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
+      },
+      {
+        SQ: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #10', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6.5',
+            amount: -6.5,
+          },
+        ],
+      },
+      SQ: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+          {
+            id: 3,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '0.5',
+            price: '4.5',
+            amount: 2.25,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '3.25',
+            price: '6',
+            amount: -19.5,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
+      },
+      {
+        SQ: {
+          boughtPriceInHUF: 4283.125,
+          difference: 1469.375,
+          soldPriceInHUF: 5752.5,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
+  });
+
+  it('Test #11', () => {
+    const soldActivities = {
+      TSLA: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '2',
+            price: '6',
+            amount: -12,
+          },
+          {
+            id: 5,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '1',
+            price: '6.5',
+            amount: -6.5,
+          },
+        ],
+      },
+      SQ: {
+        buy: [
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-01',
+            currency: 'USD',
+            quantity: '1',
+            price: '5',
+            amount: 5,
+          },
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '2',
+            price: '4',
+            amount: 8,
+          },
+          {
+            id: 3,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-02',
+            currency: 'USD',
+            quantity: '0.5',
+            price: '4.5',
+            amount: 2.25,
+          },
+        ],
+        sell: [
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-09-10',
+            currency: 'USD',
+            quantity: '3.25',
+            price: '1.5',
+            amount: -4.875,
+          },
+        ],
+      },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const activityPerformanceData = getActivityPerformanceData(soldActivities, exchangeRates);
+    const expected = [
+      {
+        TSLA: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
+      },
+      {
+        SQ: {
+          boughtPriceInHUF: 4283.125,
+          difference: -2845,
+          soldPriceInHUF: 1438.125,
+        },
+      },
+    ];
+    assert.deepEqual(expected, activityPerformanceData);
   });
 
 });

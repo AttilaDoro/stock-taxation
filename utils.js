@@ -146,4 +146,5 @@ module.exports = {
   getPriceInHUFAndQuantity,
   getBoughtPriceInHUF,
   getLastIndexToKeep,
+  getSoldQuantityAndSoldPriceInHUF,
 };
