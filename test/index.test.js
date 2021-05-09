@@ -591,7 +591,7 @@ describe('getLastIndexToKeep', () => {
     const soldQuantity = 3;
 
     const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 0;
+    const expected = 1;
     assert.deepEqual(expected, lastIndexToKeep);
   });
 
@@ -671,7 +671,7 @@ describe('getLastIndexToKeep', () => {
     const soldQuantity = 4.99;
 
     const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 0;
+    const expected = 1;
     assert.deepEqual(expected, lastIndexToKeep);
   });
 
@@ -711,7 +711,7 @@ describe('getLastIndexToKeep', () => {
     const soldQuantity = 5.001;
 
     const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 1;
+    const expected = 2;
     assert.deepEqual(expected, lastIndexToKeep);
   });
 
@@ -778,7 +778,7 @@ describe('getBoughtPriceInHUF', () => {
     assert.deepEqual(expected, boughtPriceInHUF);
   });
 
-  it.only('Test #3', () => {
+  it('Test #3', () => {
     const buy = [
       {
         tradeDate: '2020-12-18',
@@ -846,7 +846,7 @@ describe('getBoughtPriceInHUF', () => {
         id: 122,
       },
     ];
-    const lastIndexToKeep = 0;
+    const lastIndexToKeep = 1;
     const soldQuantity = 8;
     const exchangeRates = {
       '20201218': '300',
@@ -859,51 +859,50 @@ describe('getBoughtPriceInHUF', () => {
     assert.deepEqual(expected, boughtPriceInHUF);
   });
 
-  /* it('Test #1', () => {
+  it('Test #5', () => {
     const buy = [
       {
         tradeDate: '2020-12-18',
         currency: 'USD',
         activityType: 'BUY',
         symbol: 'SPCE',
-        quantity: '2.096436',
-        price: '23.85',
-        amount: 49.9999986,
+        quantity: '5',
+        price: '20',
+        amount: 100,
         id: 120,
       },
       {
-        tradeDate: '2020-10-30',
+        tradeDate: '2020-12-19',
         currency: 'USD',
         activityType: 'BUY',
         symbol: 'SPCE',
-        quantity: '1.452643',
-        price: '17.21',
-        amount: 24.99998603,
-        id: 130,
+        quantity: '5',
+        price: '30',
+        amount: 150,
+        id: 121,
       },
       {
-        tradeDate: '2020-10-28',
+        tradeDate: '2020-12-20',
         currency: 'USD',
         activityType: 'BUY',
         symbol: 'SPCE',
-        quantity: '2.80112',
-        price: '17.85',
-        amount: 49.999992,
-        id: 131,
-      }
+        quantity: '5',
+        price: '25',
+        amount: 125,
+        id: 122,
+      },
     ];
-    const lastIndexToKeep = 0;
-    const soldQuantity = 3;
+    const lastIndexToKeep = 2;
+    const soldQuantity = 15;
     const exchangeRates = {
-      '20201218': '302.33',
-      '20201030': '290',
-      '20201028': '300',
-      '20201028': '310',
+      '20201218': '300',
+      '20201219': '310',
+      '20201220': '320',
     };
 
     const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 0;
+    const expected = 116500;
     assert.deepEqual(expected, boughtPriceInHUF);
-  }); */
+  });
 
 });

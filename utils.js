@@ -73,19 +73,20 @@ const getPriceInHUFAndQuantity = (currentPrice, currentTradeDate, currentQuantit
 
 const getLastIndexToKeep = (buy, soldQuantity) => {
   const { lastIndexToKeep } = buy.reduce((accumulator, { quantity }, index) => {
-    const nextItem = buy[index + 1];
-    if (!nextItem) return accumulator;
+    if (accumulator.lastIndexToKeep !== -1) return accumulator;
     const quantitySoFar = new BigNumber(accumulator.quantity);
-    const quantitySum = quantitySoFar.plus(quantity).plus(nextItem.quantity);
-    return { quantity: quantitySoFar.plus(quantity).toNumber(), lastIndexToKeep: quantitySum.isLessThanOrEqualTo(soldQuantity) ? index + 1 : accumulator.lastIndexToKeep };
-  }, { quantity: 0, lastIndexToKeep: 0 });
-  return lastIndexToKeep;
+    const quantitySum = quantitySoFar.plus(quantity);
+    const newQuantity = quantitySoFar.plus(quantity).toNumber();
+    if (quantitySum.isLessThan(soldQuantity)) return { quantity: newQuantity, lastIndexToKeep: -1 };
+    return { quantity: newQuantity, lastIndexToKeep: index };
+  }, { quantity: 0, lastIndexToKeep: -1 });
+  return lastIndexToKeep === -1 ? buy.length - 1 : lastIndexToKeep;
 };
 
 const getBoughtPriceInHUF = (buy, lastIndexToKeep, soldQuantity, exchangeRates) => {
   const importantBuys = buy.slice(0, lastIndexToKeep + 1);
   const { priceInHUF: boughtPriceInHUF } = importantBuys.reduce((accumulator, currentActivity, index) => {
-    if (index < lastIndexToKeep || importantBuys.length === buy.length) {
+    if (index < lastIndexToKeep) {
       return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
     }
     const sold = new BigNumber(soldQuantity);
