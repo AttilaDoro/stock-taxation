@@ -13,10 +13,16 @@ const getAmount = (activityType, quantityString, priceString) => {
 const getActivitiesByActivityType = (activities, type) => activities.filter(({ activityType }) => activityType === type);
 const getActivitiesBySymbol = (activities, givenSymbol) => activities.filter(({ symbol }) => symbol === givenSymbol);
 
+const sortByDate = ({ tradeDate: tradeDateA }, { tradeDate: tradeDateB }) => {
+  if (moment(tradeDateA).isBefore(tradeDateB)) return -1;
+  if (moment(tradeDateB).isBefore(tradeDateA)) return 1;
+  return 0;
+};
+
 const getBuyActivitiesThatWereSoldLater = (activities) => {
   const soldActivities = getActivitiesByActivityType(activities, 'SELL');
   const boughtActivities = getActivitiesByActivityType(activities, 'BUY');
-  return soldActivities.reduce((finalActivitiesObject, currentSoldActivity) => {
+  const buyActivitiesThatWereSoldLater = soldActivities.reduce((finalActivitiesObject, currentSoldActivity) => {
     const { id, symbol } = currentSoldActivity;
     const boughtActivitiesFilteredBySymbol = getActivitiesBySymbol(boughtActivities, symbol);
 
@@ -29,6 +35,13 @@ const getBuyActivitiesThatWereSoldLater = (activities) => {
 
     return finalActivitiesObjectCopy;
   }, {});
+
+  Object.entries(buyActivitiesThatWereSoldLater).forEach(([symbol, data]) => {
+    data.buy.sort(sortByDate);
+    data.sell.sort(sortByDate);
+  });
+
+  return buyActivitiesThatWereSoldLater;
 };
 
 const mapActivityDate = ({ tradeDate }) => moment(tradeDate, 'YYYY-MM-DD').format('YYYYMMDD');

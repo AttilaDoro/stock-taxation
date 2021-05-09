@@ -26,6 +26,7 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         id: 1,
         activityType: 'BUY',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
     ];
     const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
@@ -39,11 +40,13 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         id: 1,
         activityType: 'BUY',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 2,
         activityType: 'BUY',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
     ];
     const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
@@ -57,11 +60,13 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         id: 1,
         activityType: 'SELL',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 2,
         activityType: 'BUY',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
     ];
     const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
@@ -72,7 +77,8 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
           {
             id: 1,
             activityType: 'SELL',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           },
         ],
       },
@@ -86,11 +92,13 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         id: 1,
         activityType: 'SELL',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 2,
         activityType: 'SELL',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
     ];
     const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
@@ -101,7 +109,8 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
           {
             id: 1,
             activityType: 'SELL',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           },
         ],
       },
@@ -111,7 +120,8 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
           {
             id: 2,
             activityType: 'SELL',
-            symbol: 'SQ'
+            symbol: 'SQ',
+            tradeDate: '2020-10-01',
           },
         ],
       },
@@ -125,36 +135,43 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
         id: 1,
         activityType: 'BUY',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 2,
         activityType: 'BUY',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 3,
         activityType: 'BUY',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
       {
         id: 4,
         activityType: 'SELL',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 5,
         activityType: 'BUY',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
       {
         id: 6,
         activityType: 'SELL',
         symbol: 'TSLA',
+        tradeDate: '2020-10-01',
       },
       {
         id: 7,
         activityType: 'SELL',
         symbol: 'SQ',
+        tradeDate: '2020-10-01',
       },
     ];
 
@@ -166,24 +183,28 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
           {
             id: 1,
             activityType: 'BUY',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           },
           {
             id: 2,
             activityType: 'BUY',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           }
         ],
         sell: [
           {
             id: 4,
             activityType: 'SELL',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           },
           {
             id: 6,
             activityType: 'SELL',
-            symbol: 'TSLA'
+            symbol: 'TSLA',
+            tradeDate: '2020-10-01',
           }
         ]
       },
@@ -192,19 +213,130 @@ describe('getBuyActivitiesThatWereSoldLater', () => {
           {
             id: 3,
             activityType: 'BUY',
-            symbol: 'SQ'
+            symbol: 'SQ',
+            tradeDate: '2020-10-01',
           },
           {
             id: 5,
             activityType: 'BUY',
-            symbol: 'SQ'
+            symbol: 'SQ',
+            tradeDate: '2020-10-01',
           }
         ],
         sell: [
           {
             id: 7,
             activityType: 'SELL',
-            symbol: 'SQ'
+            symbol: 'SQ',
+            tradeDate: '2020-10-01',
+          }
+        ]
+      }
+    };
+
+    assert.deepEqual(expected, buyActivitiesThatWereSoldLater);
+  });
+
+  it('Test #7', () => {
+    const activities = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-10-11',
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-10-05',
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'SQ',
+        tradeDate: '2020-10-28',
+      },
+      {
+        id: 4,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-10-22',
+      },
+      {
+        id: 5,
+        activityType: 'BUY',
+        symbol: 'SQ',
+        tradeDate: '2020-10-03',
+      },
+      {
+        id: 6,
+        activityType: 'SELL',
+        symbol: 'TSLA',
+        tradeDate: '2020-10-21',
+      },
+      {
+        id: 7,
+        activityType: 'SELL',
+        symbol: 'SQ',
+        tradeDate: '2020-10-05',
+      },
+    ];
+
+    const buyActivitiesThatWereSoldLater = getBuyActivitiesThatWereSoldLater(activities);
+
+    const expected = {
+      TSLA: {
+        buy: [
+          {
+            id: 2,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-10-05',
+          },
+          {
+            id: 1,
+            activityType: 'BUY',
+            symbol: 'TSLA',
+            tradeDate: '2020-10-11',
+          }
+        ],
+        sell: [
+          {
+            id: 6,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-10-21',
+          },
+          {
+            id: 4,
+            activityType: 'SELL',
+            symbol: 'TSLA',
+            tradeDate: '2020-10-22',
+          }
+        ]
+      },
+      SQ: {
+        buy: [
+          {
+            id: 5,
+            activityType: 'BUY',
+            symbol: 'SQ',
+            tradeDate: '2020-10-03',
+          },
+          {
+            id: 3,
+            activityType: 'BUY',
+            symbol: 'SQ',
+            tradeDate: '2020-10-28',
+          }
+        ],
+        sell: [
+          {
+            id: 7,
+            activityType: 'SELL',
+            symbol: 'SQ',
+            tradeDate: '2020-10-05',
           }
         ]
       }
