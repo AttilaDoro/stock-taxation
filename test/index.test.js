@@ -9,6 +9,7 @@ const {
   getLastIndexToKeep,
   getSoldQuantityAndSoldPriceInHUF,
   getActivityPerformanceData,
+  getTaxAmount,
 } = require('../utils');
 
 describe('getBuyActivitiesThatWereSoldLater', () => {
@@ -2024,6 +2025,90 @@ describe('getActivityPerformanceData', () => {
       },
     ];
     assert.deepEqual(expected, activityPerformanceData);
+  });
+
+});
+
+describe('getTaxAmount', () => {
+
+  it('Test #1', () => {
+    const performanceData = {
+      TSLA: {
+        boughtPriceInHUF: 3940,
+        difference: 1517.5,
+        soldPriceInHUF: 5457.5,
+      },
+    };
+    const taxAmount = getTaxAmount(performanceData);
+    const expected = 227.625;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #2', () => {
+    const performanceData = {
+      TSLA: {
+        boughtPriceInHUF: 5457.5,
+        difference: -1517.5,
+        soldPriceInHUF: 3940,
+      },
+    };
+    const taxAmount = getTaxAmount(performanceData);
+    const expected = 0;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #3', () => {
+    const performanceData = {
+      TSLA: {
+        boughtPriceInHUF: 3940,
+        difference: 1517.5,
+        soldPriceInHUF: 5457.5,
+      },
+      SQ: {
+        boughtPriceInHUF: 3940,
+        difference: 1517.5,
+        soldPriceInHUF: 5457.5,
+      },
+    };
+    const taxAmount = getTaxAmount(performanceData);
+    const expected = 455.25;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #4', () => {
+    const performanceData = {
+      TSLA: {
+        boughtPriceInHUF: 3940,
+        difference: 1517.5,
+        soldPriceInHUF: 5457.5,
+      },
+      SQ: {
+        boughtPriceInHUF: 5457.5,
+        difference: -1517.5,
+        soldPriceInHUF: 3940,
+      },
+    };
+    const taxAmount = getTaxAmount(performanceData);
+    const expected = 227.625;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #5', () => {
+    const performanceData = {
+      TSLA: {
+        boughtPriceInHUF: 5457.5,
+        difference: -1517.5,
+        soldPriceInHUF: 3940,
+      },
+      SQ: {
+        boughtPriceInHUF: 5457.5,
+        difference: -1517.5,
+        soldPriceInHUF: 3940,
+      },
+    };
+    const taxAmount = getTaxAmount(performanceData);
+    const expected = 0;
+    assert.deepEqual(expected, taxAmount);
   });
 
 });

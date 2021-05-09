@@ -136,17 +136,16 @@ const getAllPerformanceData = activityPerformanceData => activityPerformanceData
 }, {});
 
 const getTaxAmount = (performanceData) => {
-  const symbols = Object.keys(performanceData);
-  const finalPerformance = symbols.reduce((accumulator, currentSymbol) => {
-    const { difference } = performanceData[currentSymbol];
+  const finalPerformance = Object.entries(performanceData).reduce((accumulator, [currentSymbol, { difference }]) => {
+    if (difference < 0) return accumulator;
     const acc = new BigNumber(accumulator);
     return acc.plus(difference).toNumber();
   }, 0);
+
   if (finalPerformance <= 0) return 0;
   const performance = new BigNumber(finalPerformance);
   return performance.multipliedBy(0.15).toNumber();
 };
-
 
 module.exports = {
   getAmount,
