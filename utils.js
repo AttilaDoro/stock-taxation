@@ -10,8 +10,7 @@ const getAmount = (activityType, quantityString, priceString) => {
   return amountBigN.multipliedBy('-1').toNumber();
 };
 
-const getActivitiesByActivityTypeAndSelectedYear = (activities, selectedYear, type) => activities
-  .filter(({ activityType, tradeDate }) => activityType === type && moment(tradeDate).isBefore(`${selectedYear + 1}-01-01`));
+const getActivitiesByActivityType = (activities, type) => activities.filter(({ activityType }) => activityType === type);
 const getActivitiesBySymbol = (activities, givenSymbol) => activities.filter(({ symbol }) => symbol === givenSymbol);
 
 const sortByDate = ({ tradeDate: tradeDateA }, { tradeDate: tradeDateB }) => {
@@ -20,9 +19,9 @@ const sortByDate = ({ tradeDate: tradeDateA }, { tradeDate: tradeDateB }) => {
   return 0;
 };
 
-const getBuyActivitiesThatWereSoldLater = (activities, selectedYear) => {
-  const soldActivities = getActivitiesByActivityTypeAndSelectedYear(activities, selectedYear, 'SELL');
-  const boughtActivities = getActivitiesByActivityTypeAndSelectedYear(activities, selectedYear, 'BUY');
+const getBuyActivitiesThatWereSoldLater = (activities) => {
+  const soldActivities = getActivitiesByActivityType(activities, 'SELL');
+  const boughtActivities = getActivitiesByActivityType(activities, 'BUY');
   const buyActivitiesThatWereSoldLater = soldActivities.reduce((finalActivitiesObject, currentSoldActivity) => {
     const { id, symbol } = currentSoldActivity;
     const boughtActivitiesFilteredBySymbol = getActivitiesBySymbol(boughtActivities, symbol);
@@ -85,49 +84,85 @@ const getPriceInHUFAndQuantity = (currentPrice, currentTradeDate, currentQuantit
   return { quantity, priceInHUF };
 };
 
-const getLastIndexToKeep = (buy, soldQuantity) => {
-  const { lastIndexToKeep } = buy.reduce((accumulator, { quantity }, index) => {
-    if (accumulator.lastIndexToKeep !== -1) return accumulator;
-    const quantitySoFar = new BigNumber(accumulator.quantity);
+const getSellPriceAndQuantityByYear = (sell, exchangeRates) => sell.reduce((accumulator, { price, tradeDate, quantity }) => {
+  const yearOfCurrentTransaction = moment(tradeDate).year();
+  const priceInHUFSoFar = !accumulator[yearOfCurrentTransaction] ? 0: accumulator[yearOfCurrentTransaction].priceInHUF;
+  const quantitySoFar = !accumulator[yearOfCurrentTransaction] ? 0: accumulator[yearOfCurrentTransaction].quantity;
+  return {
+    ...accumulator,
+    [yearOfCurrentTransaction]: getPriceInHUFAndQuantity(price, tradeDate, quantity, priceInHUFSoFar, quantitySoFar, exchangeRates),
+  };
+}, {});
+
+const getBuyPriceAndQuantityByYear = (buy, sellData, exchangeRates) => {
+  const sellYears = Object.keys(sellData);
+  const [firstYear] = sellYears;
+  let isFinished = false;
+  return buy.reduce((accumulator, { id, price, tradeDate, quantity }) => {
+    if (isFinished) return accumulator;
+    const buyItemsSoFar = Object.entries(accumulator);
+    const [latestYear, buyDataSoFar] = buyItemsSoFar[buyItemsSoFar.length - 1];
+    const { quantity: soldQuantity } = sellData[latestYear];
+    const quantitySoFar = new BigNumber(buyDataSoFar.quantity);
     const quantitySum = quantitySoFar.plus(quantity);
-    const newQuantity = quantitySoFar.plus(quantity).toNumber();
-    if (quantitySum.isLessThan(soldQuantity)) return { quantity: newQuantity, lastIndexToKeep: -1 };
-    return { quantity: newQuantity, lastIndexToKeep: index };
-  }, { quantity: 0, lastIndexToKeep: -1 });
-  return lastIndexToKeep === -1 ? buy.length - 1 : lastIndexToKeep;
-};
+    const newQuantityNum = quantitySum.toNumber();
 
-const getBoughtPriceInHUF = (buy, lastIndexToKeep, soldQuantity, exchangeRates) => {
-  const importantBuys = buy.slice(0, lastIndexToKeep + 1);
-  const { priceInHUF: boughtPriceInHUF } = importantBuys.reduce((accumulator, currentActivity, index) => {
-    if (index < lastIndexToKeep) {
-      return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, currentActivity.quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
+    if (quantitySum.isLessThan(soldQuantity)) {
+      return {
+        ...accumulator,
+        [latestYear]: getPriceInHUFAndQuantity(price, tradeDate, quantity, buyDataSoFar.priceInHUF, quantitySoFar, exchangeRates),
+      };
     }
+
+    const remainingForNextYearQuantity = quantitySum.minus(soldQuantity).toNumber();
     const sold = new BigNumber(soldQuantity);
-    const remainder = sold.minus(accumulator.quantity).toNumber();
-    return getPriceInHUFAndQuantity(currentActivity.price, currentActivity.tradeDate, remainder, accumulator.priceInHUF, accumulator.quantity, exchangeRates);
-  }, { quantity: 0, priceInHUF: 0 });
-  return boughtPriceInHUF;
-};
+    const remainingForThisYearQuantity = sold.minus(quantitySoFar).toNumber();
 
-const getSoldQuantityAndSoldPriceInHUF = (sell, exchangeRates) => sell.reduce(
-  (accumulator, { price, tradeDate, quantity }) => getPriceInHUFAndQuantity(price, tradeDate, quantity, accumulator.priceInHUF, accumulator.quantity, exchangeRates),
-  { quantity: 0, priceInHUF: 0 }
-);
+    const indexOfLatestYear = sellYears.indexOf(latestYear);
+    const newYear = sellYears[indexOfLatestYear + 1];
 
-const getActivityPerformanceData = (soldActivities, exchangeRates) => {
-  const symbols = Object.keys(soldActivities);
-  return symbols.map((symbol) => {
-    const { buy, sell } = soldActivities[symbol];
-    const { quantity: soldQuantity, priceInHUF: soldPriceInHUF } = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const returnObj = {};
-    const soldPrice = new BigNumber(soldPriceInHUF);
-    returnObj[symbol] = { soldPriceInHUF, boughtPriceInHUF, difference: soldPrice.minus(boughtPriceInHUF).toNumber() };
-    return returnObj;
+    if (!newYear) {
+      isFinished = true;
+      return {
+        ...accumulator,
+        [latestYear]: getPriceInHUFAndQuantity(price, tradeDate, remainingForThisYearQuantity, buyDataSoFar.priceInHUF, quantitySoFar, exchangeRates),
+      };
+    }
+  
+    return {
+      ...accumulator,
+      [latestYear]: getPriceInHUFAndQuantity(price, tradeDate, remainingForThisYearQuantity, buyDataSoFar.priceInHUF, quantitySoFar, exchangeRates),
+      [newYear]: getPriceInHUFAndQuantity(price, tradeDate, remainingForNextYearQuantity, 0, 0, exchangeRates),
+    };
+  }, {
+    [firstYear]: { quantity: 0, priceInHUF: 0 },
   });
 };
+
+const getPerformanceByYear = (buy, sell, exchangeRates) => {
+  const sellData = getSellPriceAndQuantityByYear(sell, exchangeRates);
+  const buyData = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+  return Object.entries(sellData).reduce((accumulator, [year, { quantity: sellQuantity, priceInHUF: sellPrice }]) => {
+    const { quantity: buyQuantity, priceInHUF: buyPrice } = buyData[year];
+    const sellPriceNum = new BigNumber(sellPrice);
+    return {
+      ...accumulator,
+      [year]: {
+        boughtPriceInHUF: buyPrice,
+        difference: sellPriceNum.minus(buyPrice).toNumber(),
+        soldPriceInHUF: sellPrice,
+      }
+    };
+  }, {});
+};
+
+const getActivityPerformanceData = (soldActivities, exchangeRates) =>
+  Object.entries(soldActivities).map(([symbol, { buy, sell }]) => {
+    const performanceByYear = getPerformanceByYear(buy, sell, exchangeRates);
+    return {
+      [symbol]: performanceByYear,
+    };
+  });
 
 const getAllPerformanceData = activityPerformanceData => activityPerformanceData.reduce((accumulator, current) => {
   const [symbol] = Object.keys(current);
@@ -136,8 +171,9 @@ const getAllPerformanceData = activityPerformanceData => activityPerformanceData
   return newObj;
 }, {});
 
-const getTaxAmount = (performanceData) => {
-  const finalPerformance = Object.entries(performanceData).reduce((accumulator, [currentSymbol, { difference }]) => {
+const getTaxAmount = (performanceData, selectedYear) => {
+  const finalPerformance = Object.entries(performanceData).reduce((accumulator, [currentSymbol, performanceDataByYear]) => {
+    const { difference = 0 } = performanceDataByYear[selectedYear] || {};
     if (difference < 0) return accumulator;
     const acc = new BigNumber(accumulator);
     return acc.plus(difference).toNumber();
@@ -157,7 +193,5 @@ module.exports = {
   getTaxAmount,
   getActivityPriceInHUF,
   getPriceInHUFAndQuantity,
-  getBoughtPriceInHUF,
-  getLastIndexToKeep,
-  getSoldQuantityAndSoldPriceInHUF,
+  getBuyPriceAndQuantityByYear,
 };

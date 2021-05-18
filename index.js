@@ -16,14 +16,14 @@ Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
     const activities = [...activitiesFromRevolut, ...activitiesFromTrading212].map((activity, index) => ({ ...activity, id: index + 1 }));
     const year = process.argv[2] || (moment().year() - 1);
     const selectedYear = parseInt(year, 10);
-    const soldActivities = getBuyActivitiesThatWereSoldLater(activities, selectedYear);
+    const soldActivities = getBuyActivitiesThatWereSoldLater(activities);
     const activityDates = getAllActivityDates(soldActivities);
     getMnbKozepArfolyamByDates(activityDates).then((exchangeRates) => {
       const performanceData = getAllPerformanceData(getActivityPerformanceData(soldActivities, exchangeRates));
-      const taxAmount = getTaxAmount(performanceData);
+      const taxAmount = getTaxAmount(performanceData, selectedYear);
       console.log(performanceData);
       console.log('*******************');
-      console.log('TAX AMOUNT: ', taxAmount);
+      console.log(`TAX AMOUNT FOR ${selectedYear}: `, taxAmount);
       console.log('*******************');
     });
   })

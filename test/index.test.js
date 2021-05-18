@@ -4,12 +4,10 @@ const {
   getAllActivityDates,
   getActivityPriceInHUF,
   getPriceInHUFAndQuantity,
-  getBoughtPriceInHUF,
   getAmount,
-  getLastIndexToKeep,
-  getSoldQuantityAndSoldPriceInHUF,
   getActivityPerformanceData,
   getTaxAmount,
+  getBuyPriceAndQuantityByYear,
 } = require('../utils');
 
 describe('getBuyActivitiesThatWereSoldLater', () => {
@@ -608,568 +606,6 @@ describe('getAmount', () => {
 
 });
 
-describe('getLastIndexToKeep', () => {
-
-  it('Test #1', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.096436',
-        price: '23.85',
-        amount: 49.9999986,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1.452643',
-        price: '17.21',
-        amount: 24.99998603,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.80112',
-        price: '17.85',
-        amount: 49.999992,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 6.350199;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 2;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-  it('Test #2', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.096436',
-        price: '23.85',
-        amount: 49.9999986,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1.452643',
-        price: '17.21',
-        amount: 24.99998603,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.80112',
-        price: '17.85',
-        amount: 49.999992,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 1;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 0;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-  it('Test #3', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.096436',
-        price: '23.85',
-        amount: 49.9999986,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1.452643',
-        price: '17.21',
-        amount: 24.99998603,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.80112',
-        price: '17.85',
-        amount: 49.999992,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 3;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 1;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-  it('Test #4', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.096436',
-        price: '23.85',
-        amount: 49.9999986,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1.452643',
-        price: '17.21',
-        amount: 24.99998603,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2.80112',
-        price: '17.85',
-        amount: 49.999992,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 10;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 2;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-  it('Test #5', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2',
-        price: '5',
-        amount: 10,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '3',
-        price: '4',
-        amount: 12,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1',
-        price: '7',
-        amount: 7,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 4.99;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 1;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-  it('Test #6', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '2',
-        price: '5',
-        amount: 10,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-10-30',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '3',
-        price: '4',
-        amount: 12,
-        id: 130,
-      },
-      {
-        tradeDate: '2020-10-28',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '1',
-        price: '7',
-        amount: 7,
-        id: 131,
-      }
-    ];
-    const soldQuantity = 5.001;
-
-    const lastIndexToKeep = getLastIndexToKeep(buy, soldQuantity);
-    const expected = 2;
-    assert.deepEqual(expected, lastIndexToKeep);
-  });
-
-});
-
-describe('getBoughtPriceInHUF', () => {
-
-  it('Test #1', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '20',
-        amount: 100,
-        id: 120,
-      },
-    ];
-    const lastIndexToKeep = 0;
-    const soldQuantity = 3;
-    const exchangeRates = {
-      '20201218': '300',
-    };
-
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 18000;
-    assert.deepEqual(expected, boughtPriceInHUF);
-  });
-
-  it('Test #2', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '20',
-        amount: 100,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-12-19',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '30',
-        amount: 150,
-        id: 121,
-      },
-    ];
-    const lastIndexToKeep = 0;
-    const soldQuantity = 3;
-    const exchangeRates = {
-      '20201218': '300',
-      '20201219': '310',
-    };
-
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 18000;
-    assert.deepEqual(expected, boughtPriceInHUF);
-  });
-
-  it('Test #3', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '20',
-        amount: 100,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-12-19',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '30',
-        amount: 150,
-        id: 121,
-      },
-    ];
-    const lastIndexToKeep = 1;
-    const soldQuantity = 8;
-    const exchangeRates = {
-      '20201218': '300',
-      '20201219': '310',
-    };
-
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 57900;
-    assert.deepEqual(expected, boughtPriceInHUF);
-  });
-
-  it('Test #4', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '20',
-        amount: 100,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-12-19',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '30',
-        amount: 150,
-        id: 121,
-      },
-      {
-        tradeDate: '2020-12-20',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '25',
-        amount: 125,
-        id: 122,
-      },
-    ];
-    const lastIndexToKeep = 1;
-    const soldQuantity = 8;
-    const exchangeRates = {
-      '20201218': '300',
-      '20201219': '310',
-      '20201220': '320',
-    };
-
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 57900;
-    assert.deepEqual(expected, boughtPriceInHUF);
-  });
-
-  it('Test #5', () => {
-    const buy = [
-      {
-        tradeDate: '2020-12-18',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '20',
-        amount: 100,
-        id: 120,
-      },
-      {
-        tradeDate: '2020-12-19',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '30',
-        amount: 150,
-        id: 121,
-      },
-      {
-        tradeDate: '2020-12-20',
-        currency: 'USD',
-        activityType: 'BUY',
-        symbol: 'SPCE',
-        quantity: '5',
-        price: '25',
-        amount: 125,
-        id: 122,
-      },
-    ];
-    const lastIndexToKeep = 2;
-    const soldQuantity = 15;
-    const exchangeRates = {
-      '20201218': '300',
-      '20201219': '310',
-      '20201220': '320',
-    };
-
-    const boughtPriceInHUF = getBoughtPriceInHUF(buy, lastIndexToKeep, soldQuantity, exchangeRates);
-    const expected = 116500;
-    assert.deepEqual(expected, boughtPriceInHUF);
-  });
-
-});
-
-describe('getSoldQuantityAndSoldPriceInHUF', () => {
-
-  it('Test #1', () => {
-    const sell = [
-      {
-        id: 4,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-04',
-        currency: 'USD',
-        quantity: '1',
-        price: '216.95',
-        amount: -216.95,
-      },
-      {
-        id: 6,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-04',
-        currency: 'USD',
-        quantity: '1',
-        price: '202',
-        amount: -202,
-      },
-    ];
-    const exchangeRates = {
-      '20201218': '300',
-      '20200904': '310',
-      '20201220': '320',
-    };
-    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
-    const expected = { quantity: 2, priceInHUF: 129874.5 };
-    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
-  });
-
-  it('Test #2', () => {
-    const sell = [
-      {
-        id: 4,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-04',
-        currency: 'USD',
-        quantity: '1',
-        price: '216.95',
-        amount: -216.95,
-      },
-    ];
-    const exchangeRates = {
-      '20201218': '300',
-      '20200904': '310',
-      '20201220': '320',
-    };
-    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
-    const expected = { quantity: 1, priceInHUF: 67254.5 };
-    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
-  });
-
-  it('Test #3', () => {
-    const sell = [
-      {
-        id: 4,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-04',
-        currency: 'USD',
-        quantity: '10',
-        price: '25',
-        amount: -250,
-      },
-    ];
-    const exchangeRates = {
-      '20201218': '300',
-      '20200904': '300',
-      '20201220': '320',
-    };
-    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
-    const expected = { quantity: 10, priceInHUF: 75000 };
-    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
-  });
-
-  it('Test #4', () => {
-    const sell = [
-      {
-        id: 4,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-04',
-        currency: 'USD',
-        quantity: '1',
-        price: '5',
-        amount: -5,
-      },
-      {
-        id: 5,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-14',
-        currency: 'USD',
-        quantity: '2',
-        price: '10',
-        amount: -20,
-      },
-      {
-        id: 6,
-        activityType: 'SELL',
-        symbol: 'TSLA',
-        tradeDate: '2020-09-24',
-        currency: 'USD',
-        quantity: '3',
-        price: '20',
-        amount: -60,
-      },
-    ];
-    const exchangeRates = {
-      '20201218': '300',
-      '20200904': '300',
-      '20200914': '310',
-      '20200924': '320',
-      '20201220': '320',
-    };
-    const soldQuantityAndSoldPriceInHUF = getSoldQuantityAndSoldPriceInHUF(sell, exchangeRates);
-    const expected = { quantity: 6, priceInHUF: 26900 };
-    assert.deepEqual(expected, soldQuantityAndSoldPriceInHUF);
-  });
-
-});
-
 describe('getActivityPerformanceData', () => {
 
   it('Test #1', () => {
@@ -1209,9 +645,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 1500,
-          difference: 270,
-          soldPriceInHUF: 1770,
+          2020: {
+            boughtPriceInHUF: 1500,
+            difference: 270,
+            soldPriceInHUF: 1770,
+          },
         },
       },
     ];
@@ -1266,9 +704,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3940,
-          difference: 1370,
-          soldPriceInHUF: 5310,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1370,
+            soldPriceInHUF: 5310,
+          },
         },
       },
     ];
@@ -1323,9 +763,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 2720,
-          difference: 820,
-          soldPriceInHUF: 3540,
+          2020: {
+            boughtPriceInHUF: 2720,
+            difference: 820,
+            soldPriceInHUF: 3540,
+          },
         },
       },
     ];
@@ -1390,9 +832,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3940,
-          difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1517.5,
+            soldPriceInHUF: 5457.5,
+          },
         },
       },
     ];
@@ -1457,9 +901,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 2940,
-          difference: 638.35,
-          soldPriceInHUF: 3578.35,
+          2020: {
+            boughtPriceInHUF: 2940,
+            difference: 638.35,
+            soldPriceInHUF: 3578.35,
+          },
         },
       },
     ];
@@ -1524,9 +970,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 4165.6,
-          difference: 1330.25,
-          soldPriceInHUF: 5495.85,
+          2020: {
+            boughtPriceInHUF: 4165.6,
+            difference: 1330.25,
+            soldPriceInHUF: 5495.85,
+          },
         },
       },
     ];
@@ -1591,9 +1039,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 2110,
-          difference: -930,
-          soldPriceInHUF: 1180,
+          2020: {
+            boughtPriceInHUF: 2110,
+            difference: -930,
+            soldPriceInHUF: 1180,
+          },
         },
       },
     ];
@@ -1658,9 +1108,11 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3651.0025,
-          difference: -1506.205,
-          soldPriceInHUF: 2144.7975,
+          2020: {
+            boughtPriceInHUF: 3651.0025,
+            difference: -1506.205,
+            soldPriceInHUF: 2144.7975,
+          },
         },
       },
     ];
@@ -1771,16 +1223,20 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3940,
-          difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1517.5,
+            soldPriceInHUF: 5457.5,
+          },
         },
       },
       {
         SQ: {
-          boughtPriceInHUF: 3940,
-          difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1517.5,
+            soldPriceInHUF: 5457.5,
+          },
         },
       },
     ];
@@ -1891,16 +1347,20 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3940,
-          difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1517.5,
+            soldPriceInHUF: 5457.5,
+          },
         },
       },
       {
         SQ: {
-          boughtPriceInHUF: 4283.125,
-          difference: 1469.375,
-          soldPriceInHUF: 5752.5,
+          2020: {
+            boughtPriceInHUF: 4283.125,
+            difference: 1469.375,
+            soldPriceInHUF: 5752.5,
+          },
         },
       },
     ];
@@ -2011,16 +1471,20 @@ describe('getActivityPerformanceData', () => {
     const expected = [
       {
         TSLA: {
-          boughtPriceInHUF: 3940,
-          difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          2020: {
+            boughtPriceInHUF: 3940,
+            difference: 1517.5,
+            soldPriceInHUF: 5457.5,
+          },
         },
       },
       {
         SQ: {
-          boughtPriceInHUF: 4283.125,
-          difference: -2845,
-          soldPriceInHUF: 1438.125,
+          2020: {
+            boughtPriceInHUF: 4283.125,
+            difference: -2845,
+            soldPriceInHUF: 1438.125,
+          },
         },
       },
     ];
@@ -2032,83 +1496,596 @@ describe('getActivityPerformanceData', () => {
 describe('getTaxAmount', () => {
 
   it('Test #1', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
-        boughtPriceInHUF: 3940,
-        difference: 1517.5,
-        soldPriceInHUF: 5457.5,
+        2020: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
       },
     };
-    const taxAmount = getTaxAmount(performanceData);
+    const taxAmount = getTaxAmount(performanceData, selectedYear);
     const expected = 227.625;
     assert.deepEqual(expected, taxAmount);
   });
 
   it('Test #2', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
-        boughtPriceInHUF: 5457.5,
-        difference: -1517.5,
-        soldPriceInHUF: 3940,
+        2020: {
+          boughtPriceInHUF: 5457.5,
+          difference: -1517.5,
+          soldPriceInHUF: 3940,
+        },
       },
     };
-    const taxAmount = getTaxAmount(performanceData);
+    const taxAmount = getTaxAmount(performanceData, selectedYear);
     const expected = 0;
     assert.deepEqual(expected, taxAmount);
   });
 
   it('Test #3', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
-        boughtPriceInHUF: 3940,
-        difference: 1517.5,
-        soldPriceInHUF: 5457.5,
+        2020: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
       },
       SQ: {
-        boughtPriceInHUF: 3940,
-        difference: 1517.5,
-        soldPriceInHUF: 5457.5,
+        2020: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
       },
     };
-    const taxAmount = getTaxAmount(performanceData);
+    const taxAmount = getTaxAmount(performanceData, selectedYear);
     const expected = 455.25;
     assert.deepEqual(expected, taxAmount);
   });
 
   it('Test #4', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
-        boughtPriceInHUF: 3940,
-        difference: 1517.5,
-        soldPriceInHUF: 5457.5,
+        2020: {
+          boughtPriceInHUF: 3940,
+          difference: 1517.5,
+          soldPriceInHUF: 5457.5,
+        },
       },
       SQ: {
-        boughtPriceInHUF: 5457.5,
-        difference: -1517.5,
-        soldPriceInHUF: 3940,
+        2020: {
+          boughtPriceInHUF: 5457.5,
+          difference: -1517.5,
+          soldPriceInHUF: 3940,
+        },
       },
     };
-    const taxAmount = getTaxAmount(performanceData);
+    const taxAmount = getTaxAmount(performanceData, selectedYear);
     const expected = 227.625;
     assert.deepEqual(expected, taxAmount);
   });
 
   it('Test #5', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
-        boughtPriceInHUF: 5457.5,
-        difference: -1517.5,
-        soldPriceInHUF: 3940,
+        2020: {
+          boughtPriceInHUF: 5457.5,
+          difference: -1517.5,
+          soldPriceInHUF: 3940,
+        },
       },
       SQ: {
-        boughtPriceInHUF: 5457.5,
-        difference: -1517.5,
-        soldPriceInHUF: 3940,
+        2020: {
+          boughtPriceInHUF: 5457.5,
+          difference: -1517.5,
+          soldPriceInHUF: 3940,
+        },
       },
     };
-    const taxAmount = getTaxAmount(performanceData);
+    const taxAmount = getTaxAmount(performanceData, selectedYear);
     const expected = 0;
     assert.deepEqual(expected, taxAmount);
+  });
+
+});
+
+describe('getBuyPriceAndQuantityByYear', () => {
+
+  it('Test #1', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 1 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 1, priceInHUF: 1500 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #2', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 0.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 0.5, priceInHUF: 750 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #3', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 0.15 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 0.15, priceInHUF: 225 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #4', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 1 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 1, priceInHUF: 1500 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #5', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 2 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 2, priceInHUF: 2720 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #6', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 2.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 2.5, priceInHUF: 3330 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #7', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 3.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 3.5, priceInHUF: 4626.25 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #8', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+      {
+        id: 4,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-09-10',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 5,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-09-10',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 3.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 3.5, priceInHUF: 4626.25 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #9', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+      {
+        id: 4,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-02-02',
+        currency: 'USD',
+        quantity: '3',
+        price: '4',
+        amount: 12,
+      },
+      {
+        id: 5,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-03-03',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '5',
+        amount: 2.5,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 1.5 },
+      2021: { quantity: 3.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+      '20210202': '305',
+      '20210303': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 1.5, priceInHUF: 2110 },
+      2021: { quantity: 3.5, priceInHUF: 4346.25 }, 
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
+  });
+
+  it('Test #10', () => {
+    const buy = [
+      {
+        id: 1,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-01',
+        currency: 'USD',
+        quantity: '1',
+        price: '5',
+        amount: 5,
+      },
+      {
+        id: 2,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '2',
+        price: '4',
+        amount: 8,
+      },
+      {
+        id: 3,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2020-09-02',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '4.5',
+        amount: 2.25,
+      },
+      {
+        id: 4,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-02-02',
+        currency: 'USD',
+        quantity: '3',
+        price: '4',
+        amount: 12,
+      },
+      {
+        id: 5,
+        activityType: 'BUY',
+        symbol: 'TSLA',
+        tradeDate: '2021-03-03',
+        currency: 'USD',
+        quantity: '0.5',
+        price: '5',
+        amount: 2.5,
+      },
+    ];
+    const sellData = {
+      2020: { quantity: 1.5 },
+      2021: { quantity: 5.5 },
+    };
+    const exchangeRates = {
+      '20200901': '300',
+      '20200902': '305',
+      '20200910': '295',
+      '20210202': '305',
+      '20210303': '295',
+    };
+    const buyPriceAndQuantityByYear = getBuyPriceAndQuantityByYear(buy, sellData, exchangeRates);
+    const expected = {
+      2020: { quantity: 1.5, priceInHUF: 2110 },
+      2021: { quantity: 5.5, priceInHUF: 6913.75 },
+    };
+    assert.deepEqual(expected, buyPriceAndQuantityByYear);
   });
 
 });
