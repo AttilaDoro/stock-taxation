@@ -174,7 +174,6 @@ const getAllPerformanceData = activityPerformanceData => activityPerformanceData
 const getTaxAmount = (performanceData, selectedYear) => {
   const finalPerformance = Object.entries(performanceData).reduce((accumulator, [currentSymbol, performanceDataByYear]) => {
     const { difference = 0 } = performanceDataByYear[selectedYear] || {};
-    if (difference < 0) return accumulator;
     const acc = new BigNumber(accumulator);
     return acc.plus(difference).toNumber();
   }, 0);

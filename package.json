@@ -11,7 +11,7 @@
   "dependencies": {
     "axios": "^0.21.0",
     "bignumber.js": "^9.0.1",
-    "googleapis": "^39.2.0",
+    "csv-parser": "^3.0.0",
     "moment": "^2.29.1",
     "pdf-parse": "^1.1.1",
     "xml2js": "^0.4.23"

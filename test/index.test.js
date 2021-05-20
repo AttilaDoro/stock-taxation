@@ -1569,7 +1569,7 @@ describe('getTaxAmount', () => {
       },
     };
     const taxAmount = getTaxAmount(performanceData, selectedYear);
-    const expected = 227.625;
+    const expected = 0;
     assert.deepEqual(expected, taxAmount);
   });
 
