@@ -171,13 +171,15 @@ const getAllPerformanceData = activityPerformanceData => activityPerformanceData
   return newObj;
 }, {});
 
-const getTaxAmount = (performanceData, selectedYear) => {
-  const finalPerformance = Object.entries(performanceData).reduce((accumulator, [currentSymbol, performanceDataByYear]) => {
+const getFinalPerformance = (performanceData, selectedYear) => Object
+  .entries(performanceData)
+  .reduce((accumulator, [currentSymbol, performanceDataByYear]) => {
     const { difference = 0 } = performanceDataByYear[selectedYear] || {};
     const acc = new BigNumber(accumulator);
     return acc.plus(difference).toNumber();
   }, 0);
 
+const getTaxAmount = (finalPerformance) => {
   if (finalPerformance <= 0) return 0;
   const performance = new BigNumber(finalPerformance);
   return performance.multipliedBy(0.15).toNumber();
@@ -193,4 +195,5 @@ module.exports = {
   getActivityPriceInHUF,
   getPriceInHUFAndQuantity,
   getBuyPriceAndQuantityByYear,
+  getFinalPerformance,
 };

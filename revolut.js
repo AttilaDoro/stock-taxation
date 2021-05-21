@@ -19,16 +19,67 @@ const getSymbol = (row, activityType) => {
   return symbol;
 };
 
+const isValidNum = (number) => {
+  const bigNum = new BigNumber(number);
+  return !bigNum.isNaN();
+};
+
+const getAmountFromString = (row) => {
+  const chunks = row.split('(');
+  const lastChunk = chunks[chunks.length - 1];
+  const [amount] = lastChunk.split(')');
+
+  if (isValidNum(amount)) return amount;
+
+  throw new Error('INVALID AMOUNT (revolut)');
+};
+
+const getPriceAndQuantityWithMagic = (row) => {
+  const amount = getAmountFromString(row);
+  const [firstChunk = ''] = row.split('(');
+  const chunks = firstChunk.split(' ');
+  const lastChunk = chunks[chunks.length - 1];
+  const numbersFromString = [...lastChunk].filter(character => !isNaN(parseInt(character, 10)) || character === '.');
+  let price = '';
+  let quantity = '';
+
+  numbersFromString.reduce((numSoFar, currentNum, index) => {
+    const numbersString = numbersFromString.slice(index).join('');
+    const numSoFarBigNum = new BigNumber(numSoFar);
+    if (numSoFarBigNum.multipliedBy(numbersString).isEqualTo(amount)) {
+      price = numSoFar;
+      quantity = numbersString;
+    }
+    return `${numSoFar}${currentNum}`;
+  }, '');
+
+  return { price, quantity };
+};
+
 const getQuantity = (row) => {
   const [firstChunk = ''] = row.split(' at ');
   const chunks = firstChunk.split(' ');
-  return chunks[chunks.length - 1];
+  const quantity = chunks[chunks.length - 1];
+  
+  if (isValidNum(quantity)) return quantity;
+
+  const { quantity: newQuantity } = getPriceAndQuantityWithMagic(row);
+  if (isValidNum(newQuantity)) return newQuantity;
+
+  throw new Error('INVALID QUANTITY (revolut)');
 };
 
 const getPrice = (row) => {
   const [, secondChunk = ''] = row.split(' at ');
   const chunks = secondChunk.split(' ');
-  return chunks[0];
+  const price = chunks[0];
+
+  if (isValidNum(price)) return price;
+  
+  const { price: newPrice } = getPriceAndQuantityWithMagic(row);
+  if (isValidNum(newPrice)) return newPrice;
+  
+  throw new Error('INVALID PRICE (revolut)');
 };
 
 const getActivities = async (dataBuffer) => {
@@ -38,8 +89,8 @@ const getActivities = async (dataBuffer) => {
     const activities = activityRows
       .filter(row => row.includes('BUY') || row.includes('SELL'))
       .map((row) => {
-        const tradeDate = moment(row.substring(0,10), 'MM/DD/YYYY').format('YYYY-MM-DD');
-        const currency = row.substring(20,23);
+        const tradeDate = moment(row.substring(0, 10), 'MM/DD/YYYY').format('YYYY-MM-DD');
+        const currency = row.substring(20, 23);
         const activityType = row.includes('BUY') ? 'BUY' : 'SELL';
         const symbol = getSymbol(row, activityType);
         const quantity = getQuantity(row);

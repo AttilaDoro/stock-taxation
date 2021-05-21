@@ -8,6 +8,7 @@ const {
   getAllPerformanceData,
   getActivityPerformanceData,
   getTaxAmount,
+  getFinalPerformance,
 } = require('./utils');
 
 console.log('Starting...');
@@ -20,10 +21,12 @@ Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
     const activityDates = getAllActivityDates(soldActivities);
     getMnbKozepArfolyamByDates(activityDates).then((exchangeRates) => {
       const performanceData = getAllPerformanceData(getActivityPerformanceData(soldActivities, exchangeRates));
-      const taxAmount = getTaxAmount(performanceData, selectedYear);
+      const finalPerformance = getFinalPerformance(performanceData, selectedYear);
+      const taxAmount = getTaxAmount(finalPerformance);
       console.log(performanceData);
       console.log('*******************');
-      console.log(`TAX AMOUNT FOR ${selectedYear}: `, taxAmount);
+      console.log(`BALANCE FOR ${selectedYear}: ${finalPerformance} Ft`);
+      console.log(`TAX AMOUNT FOR ${selectedYear}: ${taxAmount} Ft`);
       console.log('*******************');
     });
   })
