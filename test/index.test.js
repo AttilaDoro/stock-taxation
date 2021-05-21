@@ -8,6 +8,7 @@ const {
   getActivityPerformanceData,
   getTaxAmount,
   getBuyPriceAndQuantityByYear,
+  getFinalPerformance,
 } = require('../utils');
 
 describe('getBuyActivitiesThatWereSoldLater', () => {
@@ -1497,6 +1498,50 @@ describe('getTaxAmount', () => {
 
   it('Test #1', () => {
     const selectedYear = 2020;
+    const finalPerformance = 1517.5;
+    const taxAmount = getTaxAmount(finalPerformance);
+    const expected = 227.625;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #2', () => {
+    const selectedYear = 2020;
+    const finalPerformance = -1517.5
+    const taxAmount = getTaxAmount(finalPerformance);
+    const expected = 0;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #3', () => {
+    const selectedYear = 2020;
+    const finalPerformance = 3035;
+    const taxAmount = getTaxAmount(finalPerformance);
+    const expected = 455.25;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #4', () => {
+    const selectedYear = 2020;
+    const finalPerformance = 0;
+    const taxAmount = getTaxAmount(finalPerformance);
+    const expected = 0;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+  it('Test #5', () => {
+    const selectedYear = 2020;
+    const finalPerformance = -3035;
+    const taxAmount = getTaxAmount(finalPerformance);
+    const expected = 0;
+    assert.deepEqual(expected, taxAmount);
+  });
+
+});
+
+describe('getFinalPerformance', () => {
+
+  it('Test #1', () => {
+    const selectedYear = 2020;
     const performanceData = {
       TSLA: {
         2020: {
@@ -1506,9 +1551,9 @@ describe('getTaxAmount', () => {
         },
       },
     };
-    const taxAmount = getTaxAmount(performanceData, selectedYear);
-    const expected = 227.625;
-    assert.deepEqual(expected, taxAmount);
+    const finalPerformance = getFinalPerformance(performanceData, selectedYear);
+    const expected = 1517.5;
+    assert.deepEqual(expected, finalPerformance);
   });
 
   it('Test #2', () => {
@@ -1522,9 +1567,9 @@ describe('getTaxAmount', () => {
         },
       },
     };
-    const taxAmount = getTaxAmount(performanceData, selectedYear);
-    const expected = 0;
-    assert.deepEqual(expected, taxAmount);
+    const finalPerformance = getFinalPerformance(performanceData, selectedYear);
+    const expected = -1517.5;
+    assert.deepEqual(expected, finalPerformance);
   });
 
   it('Test #3', () => {
@@ -1545,9 +1590,9 @@ describe('getTaxAmount', () => {
         },
       },
     };
-    const taxAmount = getTaxAmount(performanceData, selectedYear);
-    const expected = 455.25;
-    assert.deepEqual(expected, taxAmount);
+    const finalPerformance = getFinalPerformance(performanceData, selectedYear);
+    const expected = 3035;
+    assert.deepEqual(expected, finalPerformance);
   });
 
   it('Test #4', () => {
@@ -1568,9 +1613,9 @@ describe('getTaxAmount', () => {
         },
       },
     };
-    const taxAmount = getTaxAmount(performanceData, selectedYear);
+    const finalPerformance = getFinalPerformance(performanceData, selectedYear);
     const expected = 0;
-    assert.deepEqual(expected, taxAmount);
+    assert.deepEqual(expected, finalPerformance);
   });
 
   it('Test #5', () => {
@@ -1591,9 +1636,9 @@ describe('getTaxAmount', () => {
         },
       },
     };
-    const taxAmount = getTaxAmount(performanceData, selectedYear);
-    const expected = 0;
-    assert.deepEqual(expected, taxAmount);
+    const finalPerformance = getFinalPerformance(performanceData, selectedYear);
+    const expected = -3035;
+    assert.deepEqual(expected, finalPerformance);
   });
 
 });
