@@ -2,6 +2,7 @@ const moment = require('moment');
 const { getActivitiesFromTrading212 } = require('./trading212');
 const { getActivitiesFromRevolut } = require('./revolut');
 const { getMnbKozepArfolyamByDates } = require('./napiarfolyam');
+const { getStockSplits } = require('./stocksplit');
 const {
   getBuyActivitiesThatWereSoldLater,
   getAllActivityDates,
@@ -9,6 +10,7 @@ const {
   getActivityPerformanceData,
   getTaxAmount,
   getFinalPerformance,
+  getAdjustedActivities,
 } = require('./utils');
 
 console.log('Starting...');
@@ -19,8 +21,9 @@ Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
     const selectedYear = parseInt(year, 10);
     const soldActivities = getBuyActivitiesThatWereSoldLater(activities);
     const activityDates = getAllActivityDates(soldActivities);
-    getMnbKozepArfolyamByDates(activityDates).then((exchangeRates) => {
-      const performanceData = getAllPerformanceData(getActivityPerformanceData(soldActivities, exchangeRates));
+    Promise.all([getMnbKozepArfolyamByDates(activityDates), getStockSplits(soldActivities, activityDates[0])]).then(([exchangeRates, stockSplits]) => {
+      const adjustedActivities = getAdjustedActivities(soldActivities, stockSplits);
+      const performanceData = getAllPerformanceData(getActivityPerformanceData(adjustedActivities, exchangeRates));
       const finalPerformance = getFinalPerformance(performanceData, selectedYear);
       const taxAmount = getTaxAmount(finalPerformance);
       console.log(performanceData);

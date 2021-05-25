@@ -24,12 +24,11 @@ const getBuyActivitiesThatWereSoldLater = (activities) => {
   const boughtActivities = getActivitiesByActivityType(activities, 'BUY');
   const buyActivitiesThatWereSoldLater = soldActivities.reduce((finalActivitiesObject, currentSoldActivity) => {
     const { id, symbol } = currentSoldActivity;
-    const boughtActivitiesFilteredBySymbol = getActivitiesBySymbol(boughtActivities, symbol);
 
     const finalActivitiesObjectCopy = { ...finalActivitiesObject };
 
     if (!finalActivitiesObjectCopy[symbol]) finalActivitiesObjectCopy[symbol] = {};
-    if (!finalActivitiesObjectCopy[symbol].buy) finalActivitiesObjectCopy[symbol].buy = boughtActivitiesFilteredBySymbol;
+    if (!finalActivitiesObjectCopy[symbol].buy) finalActivitiesObjectCopy[symbol].buy = getActivitiesBySymbol(boughtActivities, symbol);
     if (!finalActivitiesObjectCopy[symbol].sell) finalActivitiesObjectCopy[symbol].sell = [currentSoldActivity];
     if (!finalActivitiesObjectCopy[symbol].sell.find((activity) => activity.id === id)) finalActivitiesObjectCopy[symbol].sell.push(currentSoldActivity);
 
@@ -185,6 +184,39 @@ const getTaxAmount = (finalPerformance) => {
   return performance.multipliedBy(0.15).toNumber();
 };
 
+const getClosestSplitData = (tradeDate, splitData) => splitData.reduce((closestSoFar, currentSplit) => {
+  const date = moment(tradeDate);
+  const currentDiff = date.diff(closestSoFar.date, 'days');
+  const newDiff = date.diff(currentSplit.date, 'days');
+  return newDiff < currentDiff ? { ...currentSplit } : { ...closestSoFar };
+}, splitData[0]);
+
+const adjustTransaction = (transaction, splitData) => {
+  const { tradeDate, quantity, price, amount } = transaction;
+  const { date, ratio } = getClosestSplitData(tradeDate, splitData);
+  if (moment(tradeDate).isBefore(date)) return { ...transaction };
+  const quantityNum = new BigNumber(quantity);
+  const priceNum = new BigNumber(price);
+  return {
+    ...transaction,
+    splitAdjustedQuantity: quantity,
+    splitAdjustedPrice: price,
+    quantity: quantityNum.dividedBy(ratio).toString(),
+    price: priceNum.multipliedBy(ratio).toString(),
+  };
+};
+
+const getAdjustedActivities = (soldActivities, stockSplits) => {
+  Object.entries(stockSplits).forEach(([symbol, splitData]) => {
+    const stock = soldActivities[symbol];
+    if (!stock) return;
+    const { buy = [], sell = [] } = stock;
+    stock.buy = buy.map(transaction => adjustTransaction(transaction, splitData));
+    stock.sell = sell.map(transaction => adjustTransaction(transaction, splitData));
+  });
+  return soldActivities;
+};
+
 module.exports = {
   getAmount,
   getBuyActivitiesThatWereSoldLater,
@@ -196,4 +228,5 @@ module.exports = {
   getPriceInHUFAndQuantity,
   getBuyPriceAndQuantityByYear,
   getFinalPerformance,
+  getAdjustedActivities,
 };
