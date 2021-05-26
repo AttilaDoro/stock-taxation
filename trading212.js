@@ -23,21 +23,24 @@ const readCsv = (path) => new Promise((resolve) => {
     });
 });
 
+const getActivityType = activityType => activityType.toLowerCase().includes('buy') ? 'BUY' : 'SELL';
+
 const getActivitiesFromTrading212 = async () => {
   try {
     const filenames = fs.readdirSync('./trading212'); 
     const filesPromises = filenames.map(readCsv);
     const allTrading212Transactions = await Promise.all(filesPromises);
     const trading212Transactions = allTrading212Transactions.flat();
-    return trading212Transactions.map(({ activityType, tradeDate, symbol, currency, quantity, price, amount }) => ({
-      activityType: activityType.toLowerCase().includes('buy') ? 'BUY' : 'SELL',
+    return trading212Transactions.map(({ activityType, tradeDate, symbol, currency, quantity, price, amount }, index) => ({
+      activityType: getActivityType(activityType),
       tradeDate: moment(tradeDate, 'YYYY-MM-DD').format('YYYY-MM-DD'),
       symbol,
       currency,
       quantity,
       price,
-      amount: getAmount(activityType, quantity, price),
+      amount: getAmount(getActivityType(activityType), quantity, price),
       isRevolut: false,
+      id: index + 1,
     }));
   } catch (error) {
     console.error('getTrading212Data error', error);

@@ -217,6 +217,20 @@ const getAdjustedActivities = (soldActivities, stockSplits) => {
   return soldActivities;
 };
 
+const getPerformance = (soldActivities, exchangeRates, stockSplits) => {
+  const adjustedActivities = getAdjustedActivities(soldActivities, stockSplits);
+  return getAllPerformanceData(getActivityPerformanceData(adjustedActivities, exchangeRates));
+};
+
+const getFinalData = (revolutFinalPerformance, trading212FinalPerformance, revolutTaxAmount, trading212TaxAmount) => {
+  const revolutPerformance = new BigNumber(revolutFinalPerformance);
+  const revolutTax = new BigNumber(revolutTaxAmount);
+  return {
+    finalPerformance: revolutPerformance.plus(trading212FinalPerformance).toNumber(),
+    finalTaxAmount: revolutTax.plus(trading212TaxAmount).toNumber(),
+  };
+};
+
 module.exports = {
   getAmount,
   getBuyActivitiesThatWereSoldLater,
@@ -229,4 +243,6 @@ module.exports = {
   getBuyPriceAndQuantityByYear,
   getFinalPerformance,
   getAdjustedActivities,
+  getPerformance,
+  getFinalData,
 };

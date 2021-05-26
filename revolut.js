@@ -88,7 +88,7 @@ const getActivities = async (dataBuffer) => {
     const activityRows = text.split('\n');
     const activities = activityRows
       .filter(row => row.includes('BUY') || row.includes('SELL'))
-      .map((row) => {
+      .map((row, index) => {
         const tradeDate = moment(row.substring(0, 10), 'MM/DD/YYYY').format('YYYY-MM-DD');
         const currency = row.substring(20, 23);
         const activityType = row.includes('BUY') ? 'BUY' : 'SELL';
@@ -96,7 +96,7 @@ const getActivities = async (dataBuffer) => {
         const quantity = getQuantity(row);
         const price = getPrice(row);
         const amount = getAmount(activityType, quantity, price);
-        return { tradeDate, currency, activityType, symbol, quantity, price, amount, isRevolut: true };
+        return { tradeDate, currency, activityType, symbol, quantity, price, amount, isRevolut: true, id: index + 1 };
       });
     return activities;
   } catch (error) {
