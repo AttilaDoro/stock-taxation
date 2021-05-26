@@ -147,9 +147,9 @@ const getPerformanceByYear = (buy, sell, exchangeRates) => {
     return {
       ...accumulator,
       [year]: {
-        boughtPriceInHUF: buyPrice,
+        buyPriceInHUF: buyPrice,
         difference: sellPriceNum.minus(buyPrice).toNumber(),
-        soldPriceInHUF: sellPrice,
+        sellPriceInHUF: sellPrice,
       }
     };
   }, {});

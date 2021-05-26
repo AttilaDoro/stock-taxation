@@ -647,9 +647,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 1500,
+            buyPriceInHUF: 1500,
             difference: 270,
-            soldPriceInHUF: 1770,
+            sellPriceInHUF: 1770,
           },
         },
       },
@@ -706,9 +706,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1370,
-            soldPriceInHUF: 5310,
+            sellPriceInHUF: 5310,
           },
         },
       },
@@ -765,9 +765,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 2720,
+            buyPriceInHUF: 2720,
             difference: 820,
-            soldPriceInHUF: 3540,
+            sellPriceInHUF: 3540,
           },
         },
       },
@@ -834,9 +834,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1517.5,
-            soldPriceInHUF: 5457.5,
+            sellPriceInHUF: 5457.5,
           },
         },
       },
@@ -903,9 +903,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 2940,
+            buyPriceInHUF: 2940,
             difference: 638.35,
-            soldPriceInHUF: 3578.35,
+            sellPriceInHUF: 3578.35,
           },
         },
       },
@@ -972,9 +972,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 4165.6,
+            buyPriceInHUF: 4165.6,
             difference: 1330.25,
-            soldPriceInHUF: 5495.85,
+            sellPriceInHUF: 5495.85,
           },
         },
       },
@@ -1041,9 +1041,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 2110,
+            buyPriceInHUF: 2110,
             difference: -930,
-            soldPriceInHUF: 1180,
+            sellPriceInHUF: 1180,
           },
         },
       },
@@ -1110,9 +1110,9 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3651.0025,
+            buyPriceInHUF: 3651.0025,
             difference: -1506.205,
-            soldPriceInHUF: 2144.7975,
+            sellPriceInHUF: 2144.7975,
           },
         },
       },
@@ -1225,18 +1225,18 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1517.5,
-            soldPriceInHUF: 5457.5,
+            sellPriceInHUF: 5457.5,
           },
         },
       },
       {
         SQ: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1517.5,
-            soldPriceInHUF: 5457.5,
+            sellPriceInHUF: 5457.5,
           },
         },
       },
@@ -1349,18 +1349,18 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1517.5,
-            soldPriceInHUF: 5457.5,
+            sellPriceInHUF: 5457.5,
           },
         },
       },
       {
         SQ: {
           2020: {
-            boughtPriceInHUF: 4283.125,
+            buyPriceInHUF: 4283.125,
             difference: 1469.375,
-            soldPriceInHUF: 5752.5,
+            sellPriceInHUF: 5752.5,
           },
         },
       },
@@ -1473,18 +1473,18 @@ describe('getActivityPerformanceData', () => {
       {
         TSLA: {
           2020: {
-            boughtPriceInHUF: 3940,
+            buyPriceInHUF: 3940,
             difference: 1517.5,
-            soldPriceInHUF: 5457.5,
+            sellPriceInHUF: 5457.5,
           },
         },
       },
       {
         SQ: {
           2020: {
-            boughtPriceInHUF: 4283.125,
+            buyPriceInHUF: 4283.125,
             difference: -2845,
-            soldPriceInHUF: 1438.125,
+            sellPriceInHUF: 1438.125,
           },
         },
       },
@@ -1545,9 +1545,9 @@ describe('getFinalPerformance', () => {
     const performanceData = {
       TSLA: {
         2020: {
-          boughtPriceInHUF: 3940,
+          buyPriceInHUF: 3940,
           difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          sellPriceInHUF: 5457.5,
         },
       },
     };
@@ -1561,9 +1561,9 @@ describe('getFinalPerformance', () => {
     const performanceData = {
       TSLA: {
         2020: {
-          boughtPriceInHUF: 5457.5,
+          buyPriceInHUF: 5457.5,
           difference: -1517.5,
-          soldPriceInHUF: 3940,
+          sellPriceInHUF: 3940,
         },
       },
     };
@@ -1577,16 +1577,16 @@ describe('getFinalPerformance', () => {
     const performanceData = {
       TSLA: {
         2020: {
-          boughtPriceInHUF: 3940,
+          buyPriceInHUF: 3940,
           difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          sellPriceInHUF: 5457.5,
         },
       },
       SQ: {
         2020: {
-          boughtPriceInHUF: 3940,
+          buyPriceInHUF: 3940,
           difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          sellPriceInHUF: 5457.5,
         },
       },
     };
@@ -1600,16 +1600,16 @@ describe('getFinalPerformance', () => {
     const performanceData = {
       TSLA: {
         2020: {
-          boughtPriceInHUF: 3940,
+          buyPriceInHUF: 3940,
           difference: 1517.5,
-          soldPriceInHUF: 5457.5,
+          sellPriceInHUF: 5457.5,
         },
       },
       SQ: {
         2020: {
-          boughtPriceInHUF: 5457.5,
+          buyPriceInHUF: 5457.5,
           difference: -1517.5,
-          soldPriceInHUF: 3940,
+          sellPriceInHUF: 3940,
         },
       },
     };
@@ -1623,16 +1623,16 @@ describe('getFinalPerformance', () => {
     const performanceData = {
       TSLA: {
         2020: {
-          boughtPriceInHUF: 5457.5,
+          buyPriceInHUF: 5457.5,
           difference: -1517.5,
-          soldPriceInHUF: 3940,
+          sellPriceInHUF: 3940,
         },
       },
       SQ: {
         2020: {
-          boughtPriceInHUF: 5457.5,
+          buyPriceInHUF: 5457.5,
           difference: -1517.5,
-          soldPriceInHUF: 3940,
+          sellPriceInHUF: 3940,
         },
       },
     };
