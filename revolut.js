@@ -47,8 +47,8 @@ const getPriceAndQuantityWithMagic = (row) => {
     const numbersString = numbersFromString.slice(index).join('');
     const numSoFarBigNum = new BigNumber(numSoFar);
     if (numSoFarBigNum.multipliedBy(numbersString).isEqualTo(amount)) {
-      price = numSoFar;
-      quantity = numbersString;
+      quantity = numSoFar;
+      price = numbersString;
     }
     return `${numSoFar}${currentNum}`;
   }, '');
