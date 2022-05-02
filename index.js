@@ -1,22 +1,19 @@
 const moment = require('moment');
-const { getActivitiesFromTrading212 } = require('./trading212');
-const { getActivitiesFromRevolut } = require('./revolut');
 const { getMnbKozepArfolyamByDates } = require('./napiarfolyam');
 const { getStockSplits } = require('./stocksplit');
 const {
   getBuyActivitiesThatWereSoldLater,
   getAllActivityDates,
-  getAllPerformanceData,
-  getActivityPerformanceData,
   getTaxAmount,
   getFinalPerformance,
-  getAdjustedActivities,
   getPerformance,
   getFinalData,
 } = require('./utils');
+const { getActivitiesFromFile } = require('./csvreader');
 
-console.log('Starting...');
-Promise.all([getActivitiesFromRevolut(), getActivitiesFromTrading212()])
+console.log('Started');
+console.log('Computing...');
+Promise.all([getActivitiesFromFile(true), getActivitiesFromFile(false)])
   .then(([activitiesFromRevolut, activitiesFromTrading212]) => {
     const year = process.argv[2] || (moment().year() - 1);
     const selectedYear = parseInt(year, 10);
