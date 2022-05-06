@@ -28,7 +28,7 @@ Promise.all([getActivitiesFromFile(true), getActivitiesFromFile(false)])
       const trading212FinalPerformance = getFinalPerformance(trading212PerformanceData, selectedYear);
       const revolutTaxAmount = getTaxAmount(revolutFinalPerformance);
       const trading212TaxAmount = getTaxAmount(trading212FinalPerformance);
-      const { finalPerformance, finalTaxAmount } = getFinalData(revolutFinalPerformance, trading212FinalPerformance, revolutTaxAmount, trading212TaxAmount);
+      const { finalPerformance, finalTaxAmount } = getFinalData(revolutFinalPerformance, trading212FinalPerformance);
 
       console.log(revolutPerformanceData);
       console.log(trading212PerformanceData);

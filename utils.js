@@ -222,12 +222,12 @@ const getPerformance = (soldActivities, exchangeRates, stockSplits) => {
   return getAllPerformanceData(getActivityPerformanceData(adjustedActivities, exchangeRates));
 };
 
-const getFinalData = (revolutFinalPerformance, trading212FinalPerformance, revolutTaxAmount, trading212TaxAmount) => {
+const getFinalData = (revolutFinalPerformance, trading212FinalPerformance) => {
   const revolutPerformance = new BigNumber(revolutFinalPerformance);
-  const revolutTax = new BigNumber(revolutTaxAmount);
+  const finalPerformance = revolutPerformance.plus(trading212FinalPerformance).toNumber();
   return {
-    finalPerformance: revolutPerformance.plus(trading212FinalPerformance).toNumber(),
-    finalTaxAmount: revolutTax.plus(trading212TaxAmount).toNumber(),
+    finalPerformance,
+    finalTaxAmount: getTaxAmount(finalPerformance),
   };
 };
 

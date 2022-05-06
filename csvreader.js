@@ -25,7 +25,7 @@ const mapHeaders = (isRevolut) => !isRevolut
 
 const readCsv = (isRevolut, filename) => new Promise((resolve) => {
   const results = [];
-  const path = !isRevolut ? `./trading212/${filename}` : './revolut/revolut.csv';
+  const path = !isRevolut ? `./trading212/${filename}` : `./revolut/${filename}`;
   fs.createReadStream(path)
     .pipe(csv({ mapHeaders: mapHeaders(isRevolut) }))
     .on('data', (data) => results.push(data))
@@ -35,38 +35,38 @@ const readCsv = (isRevolut, filename) => new Promise((resolve) => {
 });
 
 const getTransactions = async (isRevolut) => {
-  if (!isRevolut) {
-    const filenames = fs.readdirSync('./trading212');
-    const filesPromises = filenames
-      .filter(filename => filename.includes('.csv'))
-      .map(filename => readCsv(isRevolut, filename));
-    const allTrading212Transactions = await Promise.all(filesPromises);
-    const trading212Transactions = allTrading212Transactions.flat();
-    return trading212Transactions;
-  }
-  return readCsv(isRevolut);
+  const filenames = fs.readdirSync(!isRevolut ? './trading212' : './revolut');
+  const filesPromises = filenames
+    .filter(filename => filename.includes('.csv'))
+    .map(filename => readCsv(isRevolut, filename));
+  const allTransactions = await Promise.all(filesPromises);
+  const transactions = allTransactions.flat();
+  return transactions;
 };
 
-const filterRevolutActivities = ({ activityType }) => activityType === 'BUY' || activityType === 'SELL';
-const filterTrading212Activities = ({ activityType }) => activityType === 'Market buy' || activityType === 'Market sell';
+const filterRevolutActivities = ({ activityType }) => activityType.toLowerCase().includes('trade') || activityType.toLowerCase().includes('sell')
+const filterTrading212Activities = ({ activityType }) => activityType.toLowerCase().includes('buy') || activityType.toLowerCase().includes('sell')
 
-const getActivityType = activityType => activityType.toLowerCase().includes('buy') ? 'BUY' : 'SELL';
+const getActivityType = (activityType, isRevolut) => {
+  if (!isRevolut) return activityType.toLowerCase().includes('buy') ? 'BUY' : 'SELL';
+  return activityType.toLowerCase().includes('trade') ? 'BUY' : 'SELL';
+};
 
 const mapRevolutActivities = ({ activityType, tradeDate, symbol, currency, quantity, price }, index) => ({
-  activityType,
-  tradeDate: moment(tradeDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
+  activityType: getActivityType(activityType, true),
+  tradeDate: moment(tradeDate).format('YYYY-MM-DD'),
   symbol,
   currency,
   quantity,
-  price,
-  amount: getAmount(activityType, quantity, price),
+  price: price.substring(1),
+  amount: getAmount(getActivityType(activityType, true), quantity, price.substring(1)),
   isRevolut: true,
   id: index + 1,
 })
 
 const mapTrading212Activities = ({ activityType, tradeDate, symbol, currency, quantity, price }, index) => ({
   activityType: getActivityType(activityType),
-  tradeDate: moment(tradeDate, 'YYYY-MM-DD').format('YYYY-MM-DD'),
+  tradeDate: moment(tradeDate).format('YYYY-MM-DD'),
   symbol,
   currency,
   quantity,
